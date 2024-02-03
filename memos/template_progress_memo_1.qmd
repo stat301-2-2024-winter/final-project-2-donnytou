@@ -3,7 +3,7 @@ title: "Progress Memo 1"
 subtitle: |
   | Final Project 
   | Data Science 2 with R (STAT 301-2)
-author: "YOUR NAME"
+author: "Donny Tou"
 date: today
 
 format:
@@ -35,7 +35,7 @@ You should make this document your own. To help with this we have added a date t
 
 To link to your github **repo**sitory, appropriately edit the example link below. Meaning replace `https://your-github-repo-url` with your github repo url. Suggest verifying the link works before submitting.
 
-[https://your-github-repo-url](https://your-github-repo-url)
+[Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
 
 :::
 
@@ -47,17 +47,14 @@ GitHub (free account) cannot store large files. If you try to commit and push a 
 
 ## Data source
 
-Blah blah blah^[an example of footnote --- [content in margins](https://quarto.org/docs/blog/posts/2022-02-17-advanced-layout/)]
+Blah blah blah^[[Hotel Booking Demand](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)]
 
-## Why this data
 
-Blah blah blah^[another footnote]
-
-## Data quality & complexity check
+## Data Quality Check
 
 Blah blah blah
 
-## Potential data issues
+## Target Variable Analysis
 
 Blah blah blah
 
