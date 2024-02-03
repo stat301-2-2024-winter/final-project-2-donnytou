@@ -39,12 +39,6 @@ To link to your github **repo**sitory, appropriately edit the example link below
 
 :::
 
-::: {.callout-warning}
-GitHub (free account) cannot store large files. If you try to commit and push a large dataset you will have an ERROR! Any file over 100 MB (100,000 KB) needs to be added to the `.gitignore` file BEFORE committing.
-
-**We may need to do that for files in your final project!**
-:::
-
 ## Data source
 
 Blah blah blah^[[Hotel Booking Demand](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)]
