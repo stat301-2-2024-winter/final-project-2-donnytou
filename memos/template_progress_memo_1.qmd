@@ -33,25 +33,31 @@ You should make this document your own. To help with this we have added a date t
 
 ## Github Repo Link
 
-To link to your github **repo**sitory, appropriately edit the example link below. Meaning replace `https://your-github-repo-url` with your github repo url. Suggest verifying the link works before submitting.
-
 [Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
 
 :::
 
-## Data source
+## Prediction Problem
+Describe your prediction research question/objective and identify the type of prediction problem it is. This includes identifying a variable and clearly stating if it is a classification or regression problem. Provide a motivation for pursuing this particular problem: Why would having a prediction model be useful for this problem? Why is it interesting to you? Is this part of a larger research project? Just thought it would be fun? etc.
 
-Blah blah blah^[[Hotel Booking Demand](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)]
+## Data Source
 
+Identify and describe your data source or sources -- citations would be appropriate. Citations must include links to the data source(s).
+
+Blah blah blah^[[Hotel Booking Dataset — Kaggle](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)]
+
+Hi^[[Antonio, N., de Almeida, A., & Nunes, L. (2019). Hotel booking demand datasets. Data in Brief.](https://www.sciencedirect.com/science/article/pii/S2352340918315191)]
 
 ## Data Quality Check
 
-Blah blah blah
+You should demonstrate that you can read in your dataset(s) --- since we need proof of this, showing code is permitted or show code for the next steps. Quality check means providing answers to the following: How many variables and observations do you have? How many categorical vs numerical variables? Are there any missingness issues?
 
 ## Target Variable Analysis
 
-Blah blah blah
+A univariate analysis of the target variable. Identify and discuss potential issues (symmetry/unbalanced/skewness & missingness) and discuss potential solutions such as transformations.
 
 ## Misc
 
-Blah Blah
+Students are encouraged to add any other information that they think would be useful to communicate about their data and their plan. Articulating a time line would be a good idea since fitting/training the models may take more time than expected (leave adequate time to train models and then analyze). 
+
+
