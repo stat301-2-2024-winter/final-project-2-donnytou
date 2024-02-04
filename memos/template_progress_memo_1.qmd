@@ -12,22 +12,12 @@ format:
     embed-resources: true
     
 execute:
-  echo: false
   warning: false
 
 from: markdown+emoji 
 reference-location: margin
 citation-location: margin
 ---
-
-::: {.callout-important}
-## Memo format
-
-Like all other submissions for this course, we expect the memo to be neat and well organized. This a template to get you started. 
-
-You should make this document your own. To help with this we have added a date to the yaml above (good whenever writing memos). You should remove this block when making this document your own.
-
-:::
 
 ::: {.callout-tip icon=false}
 
@@ -38,23 +28,76 @@ You should make this document your own. To help with this we have added a date t
 :::
 
 ## Prediction Problem
+When and why do hotel bookings get cancelled? A classification problem, this research question delves into the plethora of possible factors — some supply/"hotel"-side (e.g. car parking spaces, assigned room type), others demand/"booker"-side (e.g. number of children, country of origin) — that shape the likelihood of a hotel booking being cancelled. 
+
 Describe your prediction research question/objective and identify the type of prediction problem it is. This includes identifying a variable and clearly stating if it is a classification or regression problem. Provide a motivation for pursuing this particular problem: Why would having a prediction model be useful for this problem? Why is it interesting to you? Is this part of a larger research project? Just thought it would be fun? etc.
 
 ## Data Source
 
 Identify and describe your data source or sources -- citations would be appropriate. Citations must include links to the data source(s).
 
-Blah blah blah^[[Hotel Booking Dataset — Kaggle](https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand)]
-
-Hi^[[Antonio, N., de Almeida, A., & Nunes, L. (2019). Hotel booking demand datasets. Data in Brief.](https://www.sciencedirect.com/science/article/pii/S2352340918315191)]
+Blah blah blah^[[City of Chicago Traffic Crashes](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data)]
 
 ## Data Quality Check
 
 You should demonstrate that you can read in your dataset(s) --- since we need proof of this, showing code is permitted or show code for the next steps. Quality check means providing answers to the following: How many variables and observations do you have? How many categorical vs numerical variables? Are there any missingness issues?
+```{r}
+#| echo: false
+# loading packages
+library(tidyverse) 
+library(naniar)
+library(knitr)
+```
+
+```{r}
+# rewiring markdown working directory
+setwd("/Users/donnytou/Desktop/stat301-2/final-project-2-donnytou")
+
+# loading dataset
+hotel_data <- read_csv("data/hotel_bookings.csv") |>
+  mutate(
+    across(
+      c(
+        hotel,
+        is_canceled,
+        arrival_date_month,
+        meal,
+        country,
+        market_segment,
+        distribution_channel,
+        is_repeated_guest,
+        reserved_room_type,
+        assigned_room_type,
+        deposit_type,
+        customer_type,
+        reservation_status
+      ),
+      factor
+    )
+  )
+```
+
 
 ## Target Variable Analysis
 
 A univariate analysis of the target variable. Identify and discuss potential issues (symmetry/unbalanced/skewness & missingness) and discuss potential solutions such as transformations.
+
+```{r}
+#| echo: false
+hotel_data |>
+  ggplot(aes(is_canceled)) +
+  geom_bar(fill = "steelblue") +
+  theme_classic() +
+  labs(
+    title = "Distribution of hotel bookings by cancellation status",
+    subtitle = "Most hotel bookings were not cancelled"
+  )
+hotel_data |>
+  select(is_canceled) |>
+  miss_var_summary() |>
+  kable()
+```
+
 
 ## Misc
 
