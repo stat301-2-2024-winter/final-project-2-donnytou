@@ -125,7 +125,7 @@ traffic_data |>
   theme_classic() +
   labs(
     title = "Distribution of the number of traffic incident injuries",
-    subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
+    subtitle = "Restricted to incidents involving at least 5 injured agents"
   ) +
   scale_x_continuous(breaks = c(5:20))
 traffic_data |>
