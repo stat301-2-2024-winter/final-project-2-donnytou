@@ -40,9 +40,9 @@ traffic_data <- read_csv("data/Traffic_Crashes_-_Crashes_20240203.csv") |>
   ) |>
   relocate(fatal_i)
 
-# missingness exploration — whole data
+# missingness exploration — whole dataset
 missing_table <- miss_var_summary(traffic_data) 
-datatable(traffic_data)
+datatable(missing_table)
 missing_names <- missing_table |>
   pull(variable)
 traffic_data |>
@@ -59,6 +59,9 @@ traffic_data |>
     subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
   ) +
   scale_x_continuous(breaks = c(0:20))
+traffic_data |>
+  count(injuries_total) |>
+  datatable(nrows = 5)
 traffic_data |>
   select(injuries_total) |>
   miss_var_summary() |>
