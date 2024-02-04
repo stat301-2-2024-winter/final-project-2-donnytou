@@ -28,7 +28,6 @@ citation-location: margin
 :::
 
 ## Prediction Problem
-When and why do hotel bookings get cancelled? A classification problem, this research question delves into the plethora of possible factors — some supply/"hotel"-side (e.g. car parking spaces, assigned room type), others demand/"booker"-side (e.g. number of children, country of origin) — that shape the likelihood of a hotel booking being cancelled. 
 
 Describe your prediction research question/objective and identify the type of prediction problem it is. This includes identifying a variable and clearly stating if it is a classification or regression problem. Provide a motivation for pursuing this particular problem: Why would having a prediction model be useful for this problem? Why is it interesting to you? Is this part of a larger research project? Just thought it would be fun? etc.
 
@@ -54,27 +53,39 @@ library(knitr)
 setwd("/Users/donnytou/Desktop/stat301-2/final-project-2-donnytou")
 
 # loading dataset
-hotel_data <- read_csv("data/hotel_bookings.csv") |>
+traffic_data <- read_csv("data/Traffic_Crashes_-_Crashes_20240203.csv") |>
+  janitor::clean_names() |>
+  rename(
+    roadway_surface_condition = roadway_surface_cond
+  ) |>
   mutate(
     across(
       c(
-        hotel,
-        is_canceled,
-        arrival_date_month,
-        meal,
-        country,
-        market_segment,
-        distribution_channel,
-        is_repeated_guest,
-        reserved_room_type,
-        assigned_room_type,
-        deposit_type,
-        customer_type,
-        reservation_status
+        ends_with("i"),
+        ends_with("cause"),
+        ends_with("type"),
+        ends_with("condition"),
+        traffic_control_device,
+        most_severe_injury,
+        work_zone_type,
+        street_direction,
+        alignment,
+        damage,
+        road_defect
       ),
       factor
+    ),
+    fatal_i = if_else(
+      injuries_fatal > 0,
+      TRUE,
+      if_else(
+        injuries_fatal == 0,
+        FALSE,
+        NA
+      )
     )
-  )
+  ) |>
+  relocate(fatal_i)
 ```
 
 
@@ -84,16 +95,17 @@ A univariate analysis of the target variable. Identify and discuss potential iss
 
 ```{r}
 #| echo: false
-hotel_data |>
-  ggplot(aes(is_canceled)) +
-  geom_bar(fill = "steelblue") +
+traffic_data |>
+  ggplot(aes(injuries_total)) +
+  geom_bar() +
   theme_classic() +
   labs(
-    title = "Distribution of hotel bookings by cancellation status",
-    subtitle = "Most hotel bookings were not cancelled"
-  )
-hotel_data |>
-  select(is_canceled) |>
+    title = "Distribution of the number of traffic incident injuries",
+    subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
+  ) +
+  scale_x_continuous(breaks = c(0:20))
+traffic_data |>
+  select(injuries_total) |>
   miss_var_summary() |>
   kable()
 ```

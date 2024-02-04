@@ -51,14 +51,15 @@ traffic_data |>
 
 # outcome variable exploration — distribution + missingness
 traffic_data |>
-  ggplot(aes(fatal_i)) +
-  geom_bar(fill = "steelblue") +
+  ggplot(aes(injuries_total)) +
+  geom_bar() +
   theme_classic() +
   labs(
-    title = "Distribution of hotel bookings by cancellation status",
-    subtitle = "Most hotel bookings were not cancelled"
-  )
-hotel_data |>
-  select(is_canceled) |>
+    title = "Distribution of the number of traffic incident injuries",
+    subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
+  ) +
+  scale_x_continuous(breaks = c(0:20))
+traffic_data |>
+  select(injuries_total) |>
   miss_var_summary() |>
   kable()
