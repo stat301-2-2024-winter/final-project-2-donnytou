@@ -19,6 +19,11 @@ traffic_test <- testing(traffic_split)
 # split verification
 ### observation count
 traffic_split
+.8 * 803144
+.2 * 803144
+load(here("data/traffic_train.rda"))
+load(here("data/traffic_test.rda"))
+
 ### outcome variable distribution check
 traffic_train |>
   ggplot(aes(injurious)) +
@@ -34,7 +39,7 @@ set.seed(2)
 traffic_fold <- vfold_cv(
   traffic_train,
   v = 5,
-  repeats = 10,
+  repeats = 5,
   strata = injurious
 )
 
@@ -51,3 +56,4 @@ save(
   traffic_fold,
   file = here("data/traffic_fold.rda")
 )
+
