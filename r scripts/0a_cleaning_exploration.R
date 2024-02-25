@@ -37,7 +37,7 @@ traffic_data <- read_csv("data/Traffic_Crashes_-_Crashes_20240203.csv") |>
         NA
       )
     )
-  ) 
+  )
 
 # missingness exploration — whole dataset
 missing_table <- miss_var_summary(traffic_data) 

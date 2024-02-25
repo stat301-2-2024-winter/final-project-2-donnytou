@@ -21,8 +21,6 @@ traffic_test <- testing(traffic_split)
 traffic_split
 .8 * 803144
 .2 * 803144
-load(here("data/traffic_train.rda"))
-load(here("data/traffic_test.rda"))
 
 ### outcome variable distribution check
 traffic_train |>
