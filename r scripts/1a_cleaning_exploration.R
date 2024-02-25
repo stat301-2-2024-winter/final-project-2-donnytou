@@ -37,8 +37,7 @@ traffic_data <- read_csv("data/Traffic_Crashes_-_Crashes_20240203.csv") |>
         NA
       )
     )
-  ) |>
-  relocate(fatal_i)
+  ) 
 
 # missingness exploration — whole dataset
 missing_table <- miss_var_summary(traffic_data) 
@@ -52,7 +51,7 @@ traffic_data |>
 # outcome variable exploration — distribution + missingness
 traffic_data |>
   ggplot(aes(injuries_total)) +
-  geom_bar() +
+  geom_bar(fill = "steelblue") +
   theme_classic() +
   labs(
     title = "Distribution of the number of traffic incident injuries",

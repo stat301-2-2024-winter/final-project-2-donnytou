@@ -1,0 +1,36 @@
+---
+title: "Progress Memo 2"
+subtitle: |
+  | Final Project 
+  | Data Science 2 with R (STAT 301-2)
+author: "Donny Tou"
+date: today
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji 
+reference-location: margin
+citation-location: margin
+---
+
+::: {.callout-tip icon=false}
+
+## Github Repo Link
+
+[Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
+
+:::
+
+# Progress Update
+
+## Overview/Changes
+
+## Models, Recipes, and Workflows
+
+# Next Steps
