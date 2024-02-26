@@ -3,6 +3,9 @@ library(tidyverse)
 library(tidymodels)
 library(here)
 
+# handle common conflicts
+tidymodels_prefer()
+
 # load data
 load(here("data/traffic_data_updated.rda"))
 

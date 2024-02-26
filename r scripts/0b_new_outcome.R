@@ -3,6 +3,9 @@ library(tidyverse)
 library(here)
 library(caret)
 
+# handle common conflicts
+tidymodels_prefer()
+
 # load data
 load(here("data/traffic_data_cleaned.rda"))
 
