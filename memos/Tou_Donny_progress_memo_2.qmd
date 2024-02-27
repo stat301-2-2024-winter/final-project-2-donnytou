@@ -48,7 +48,7 @@ Under normal circumstances, I probably should not throw out missing observations
 
 ## Null and Baseline Fits
 
-To investigate my predictive classification problem, I have chosen the **`accuracy` assessment metric** for its easy interpretability and compatbility with the binomial nature of my `injurious` outcome variable. I have defined my 2 basic baseline models (the first being the "true" baseline; the second being a slight upgrade) as the following:\
+To investigate my predictive classification problem, I have chosen the **`accuracy` assessment metric** for its easy interpretability as well as its compatibility with the binomial nature of my `injurious` outcome variable. I have defined my 2 basic baseline models (the first being the "true" baseline; the second being a slight upgrade) as the following:\
 
 1. **Null model**: A simple, non-informative model defined using `null_model()` with the `parsnip` engine and `classification` mode.\
 2. **Logistic regression model**: A linear model that accommodates my dummy outcome variable defined using `logistic_reg()` with the `glm` engine and `classification` mode.\
