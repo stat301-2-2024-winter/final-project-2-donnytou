@@ -1,0 +1,64 @@
+---
+title: "Progress Memo 2"
+subtitle: |
+  | Final Project 
+  | Data Science 2 with R (STAT 301-2)
+author: "Donny Tou"
+date: today
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji 
+reference-location: margin
+citation-location: margin
+---
+
+::: {.callout-tip icon=false}
+
+## Github Repo Link
+
+[Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
+
+:::
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(tidymodels)
+library(here)
+tidymodels_prefer()
+```
+
+
+# Progress Update
+
+## Data Overview/Changes
+Talk about how and why you changed your outcome variable from integer --> binomial and its implications for my predictive model. Talk about downsampling and eliminating missues values for the sake of this project and mention potential downsides. 
+
+## Models, Recipes, and Workflows
+Mention the assessment metric you will use ("accuracy"). Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.\
+
+On models: Boosted tree, random forest, elastic net (ridge OR lasso) [<= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.\
+
+On recipes: Don't just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.
+
+## Null and Baseline Fits
+[cross-reference this table below just for funsies]
+
+Mention baseline recipe used.
+```{r}
+#| echo: false
+load(here("results/combined_accuracy.rda"))
+combined_accuracy |>
+  relocate(model) |>
+  knitr::kable()
+```
+
+
+# Next Steps
