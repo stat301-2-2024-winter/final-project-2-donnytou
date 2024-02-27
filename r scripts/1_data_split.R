@@ -17,7 +17,7 @@ traffic_downsampled <- traffic_data_updated |>
     by = injurious
   )
 
-# data set shrinkage to target size (<50k rows)
+# shrink data set to target size (<50k rows)
 set.seed(1)
 traffic_split1 <- initial_split(
   traffic_downsampled,
@@ -25,6 +25,11 @@ traffic_split1 <- initial_split(
   strata = injurious
 )
 traffic_data1 <- training(traffic_split1)
+traffic_data_throwaway <- testing(traffic_split1)
+save(
+  traffic_data_throwaway,
+  file = here("data/traffic_data_throwaway.rda")
+)
 
 # initial split
 set.seed(1)
