@@ -21,6 +21,10 @@ logistic_accuracy <- logistic_fit |>
   collect_metrics() |>
   filter(.metric == "accuracy") |>
   mutate(model = "logistic")
+### elastic net fit
+### nearest neighbors fit
+### random forest fit
+### boosted tree fit
 ### combined fit
 combined_accuracy <- bind_rows(
   null_accuracy,

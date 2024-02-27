@@ -3035,7 +3035,7 @@ vertical-align: -.125em;
   <ul>
   <li><a href="#progress-update" id="toc-progress-update" class="nav-link active" data-scroll-target="#progress-update">Progress Update</a>
   <ul class="collapse">
-  <li><a href="#overviewchanges" id="toc-overviewchanges" class="nav-link" data-scroll-target="#overviewchanges">Overview/Changes</a></li>
+  <li><a href="#data-overviewchanges" id="toc-data-overviewchanges" class="nav-link" data-scroll-target="#data-overviewchanges">Data Overview/Changes</a></li>
   <li><a href="#models-recipes-and-workflows" id="toc-models-recipes-and-workflows" class="nav-link" data-scroll-target="#models-recipes-and-workflows">Models, Recipes, and Workflows</a></li>
   <li><a href="#null-and-baseline-fits" id="toc-null-and-baseline-fits" class="nav-link" data-scroll-target="#null-and-baseline-fits">Null and Baseline Fits</a></li>
   </ul></li>
@@ -3093,14 +3093,22 @@ Github Repo Link
 </div>
 <section id="progress-update" class="level1">
 <h1>Progress Update</h1>
-<section id="overviewchanges" class="level2">
-<h2 class="anchored" data-anchor-id="overviewchanges">Overview/Changes</h2>
+<section id="data-overviewchanges" class="level2">
+<h2 class="anchored" data-anchor-id="data-overviewchanges">Data Overview/Changes</h2>
+<p>Talk about downsampling and eliminating missues values for the sake of this project and mention potential downsides. Talk about how and why you changed your outcome variable from integer –&gt; binomial and its implications for my predictive model.</p>
 </section>
 <section id="models-recipes-and-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="models-recipes-and-workflows">Models, Recipes, and Workflows</h2>
+<p>Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.<br>
+</p>
+<p>On models: Boosted tree, random forest, elastic net (ridge OR lasso) [&lt;= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.<br>
+</p>
+<p>On recipes: Don’t just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.</p>
 </section>
 <section id="null-and-baseline-fits" class="level2">
 <h2 class="anchored" data-anchor-id="null-and-baseline-fits">Null and Baseline Fits</h2>
+<p>[cross-reference this table below just for funsies]</p>
+<p>Mention baseline recipe used.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
