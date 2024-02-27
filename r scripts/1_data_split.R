@@ -9,10 +9,27 @@ tidymodels_prefer()
 # load data
 load(here("data/traffic_data_updated.rda"))
 
+# downsampling using dplyr
+traffic_downsampled <- traffic_data_updated |>
+  filter(!is.na(injurious)) |>
+  slice_sample(
+    n = 110241,
+    by = injurious
+  )
+
+# data set shrinkage to target size (<50k rows)
+set.seed(1)
+traffic_split1 <- initial_split(
+  traffic_downsampled,
+  prop = 0.2,
+  strata = injurious
+)
+traffic_data1 <- training(traffic_split1)
+
 # initial split
 set.seed(1)
 traffic_split <- initial_split(
-  traffic_data_updated,
+  traffic_data1,
   prop = .8,
   strata = injurious
 )
@@ -22,17 +39,17 @@ traffic_test <- testing(traffic_split)
 # split verification
 ### observation count
 traffic_split
-.8 * 803144
-.2 * 803144
+.8 * 44096
+.2 * 44096
 
 ### outcome variable distribution check
 traffic_train |>
   ggplot(aes(injurious)) +
-  geom_bar() +
-  theme_minimal()
+  geom_bar(fill = "steelblue") +
+  theme_minimal() 
 traffic_test |>
   ggplot(aes(injurious)) +
-  geom_bar() +
+  geom_bar(fill = "steelblue") +
   theme_minimal()
 
 # V-fold cross validation
@@ -40,7 +57,7 @@ set.seed(2)
 traffic_fold <- vfold_cv(
   traffic_train,
   v = 5,
-  repeats = 5,
+  repeats = 3,
   strata = injurious
 )
 

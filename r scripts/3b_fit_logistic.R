@@ -25,6 +25,7 @@ logistic_wflow <- workflow() |>
   add_model(logistic_spec) 
 
 # fit to folds
+set.seed(2)
 logistic_fit <- fit_resamples(
   logistic_wflow,
   traffic_fold

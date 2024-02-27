@@ -27,10 +27,29 @@ citation-location: margin
 
 :::
 
+```{r}
+#| echo: false
+library(tidyverse)
+library(tidymodels)
+library(here)
+tidymodels_prefer()
+```
+
+
 # Progress Update
 
 ## Overview/Changes
 
 ## Models, Recipes, and Workflows
+
+## Null and Baseline Fits
+```{r}
+#| echo: false
+load(here("results/combined_accuracy.rda"))
+combined_accuracy |>
+  relocate(model) |>
+  knitr::kable()
+```
+
 
 # Next Steps

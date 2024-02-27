@@ -25,6 +25,7 @@ null_wflow <- workflow() |>
   add_model(null_spec)
 
 # fit to folds
+set.seed(2)
 null_fit <- fit_resamples(
   null_wflow,
   traffic_fold

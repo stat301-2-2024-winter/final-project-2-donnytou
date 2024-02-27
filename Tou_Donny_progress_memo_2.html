@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Donny Tou">
-<meta name="dcterms.date" content="2024-02-24">
+<meta name="dcterms.date" content="2024-02-26">
 
 <title>Progress Memo 2</title>
 <style>
@@ -3037,6 +3037,7 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#overviewchanges" id="toc-overviewchanges" class="nav-link" data-scroll-target="#overviewchanges">Overview/Changes</a></li>
   <li><a href="#models-recipes-and-workflows" id="toc-models-recipes-and-workflows" class="nav-link" data-scroll-target="#models-recipes-and-workflows">Models, Recipes, and Workflows</a></li>
+  <li><a href="#null-and-baseline-fits" id="toc-null-and-baseline-fits" class="nav-link" data-scroll-target="#null-and-baseline-fits">Null and Baseline Fits</a></li>
   </ul></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
   </ul>
@@ -3065,7 +3066,7 @@ Data Science 2 with R (STAT 301-2)</div><p></p>
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 24, 2024</p>
+      <p class="date">February 26, 2024</p>
     </div>
   </div>
   
@@ -3097,6 +3098,55 @@ Github Repo Link
 </section>
 <section id="models-recipes-and-workflows" class="level2">
 <h2 class="anchored" data-anchor-id="models-recipes-and-workflows">Models, Recipes, and Workflows</h2>
+</section>
+<section id="null-and-baseline-fits" class="level2">
+<h2 class="anchored" data-anchor-id="null-and-baseline-fits">Null and Baseline Fits</h2>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 13%">
+<col style="width: 4%">
+<col style="width: 13%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">model</th>
+<th style="text-align: left;">.metric</th>
+<th style="text-align: left;">.estimator</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">std_err</th>
+<th style="text-align: left;">.config</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">null</td>
+<td style="text-align: left;">accuracy</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: right;">0.5000000</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">Preprocessor1_Model1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">logistic</td>
+<td style="text-align: left;">accuracy</td>
+<td style="text-align: left;">binary</td>
+<td style="text-align: right;">0.7120703</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.0012869</td>
+<td style="text-align: left;">Preprocessor1_Model1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </section>
 </section>
 <section id="next-steps" class="level1">
