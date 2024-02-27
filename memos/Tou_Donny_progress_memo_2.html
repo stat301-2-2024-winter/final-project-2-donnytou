@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
 width: 0.8em;
 margin: 0 0.8em 0.2em -1em;  vertical-align: middle;
 }
-
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-{ counter-reset: source-line 0; }
-pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-}
-pre.numberSource { margin-left: 3em; padding-left: 4px; }
-div.sourceCode
-{ }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -3070,8 +3036,8 @@ vertical-align: -.125em;
   <li><a href="#progress-update" id="toc-progress-update" class="nav-link active" data-scroll-target="#progress-update">Progress Update</a>
   <ul class="collapse">
   <li><a href="#data-overviewchanges" id="toc-data-overviewchanges" class="nav-link" data-scroll-target="#data-overviewchanges">Data Overview/Changes</a></li>
-  <li><a href="#models-recipes-and-workflows" id="toc-models-recipes-and-workflows" class="nav-link" data-scroll-target="#models-recipes-and-workflows">Models, Recipes, and Workflows</a></li>
   <li><a href="#null-and-baseline-fits" id="toc-null-and-baseline-fits" class="nav-link" data-scroll-target="#null-and-baseline-fits">Null and Baseline Fits</a></li>
+  <li><a href="#models-recipes-and-workflows" id="toc-models-recipes-and-workflows" class="nav-link" data-scroll-target="#models-recipes-and-workflows">Models, Recipes, and Workflows</a></li>
   </ul></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
   </ul>
@@ -3131,35 +3097,33 @@ Github Repo Link
 <h2 class="anchored" data-anchor-id="data-overviewchanges">Data Overview/Changes</h2>
 <p>Collated from the Chicago Police Department (CPD)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, my dataset — in its raw from — consisted of just over 800,000 observations of collision-level data. I quickly realized in the early stages of my predictive modeling process that this was simply way too much data to work with in the context of my time- and computation-based constraints; this, coupled with an imbalance in my initial outcome variable — the number of individuals emerging injured from each traffic collision — led me to pursue the following changes since Progress Memo 1:<br>
 </p>
-<div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup> <a href="https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data">City of Chicago Traffic Crashes</a></p></li><li id="fn2"><p><sup>2</sup> The number of observations in the underrepresented outcome variable class — collisions that were injurious — was about 110,000 in the raw dataset</p></li></div><p><strong>1. Outcome variable modification</strong>: Instead of predicting the <em>number</em> of individuals emerging injured from a given collision, I now predict <em>whether</em> a given traffic collision will be injurious. This makes my predictive question a <strong>classification</strong>, rather than regression, problem. I made this switch so that I could preserve the injury-focused nature of my initial question and, at the same time, streamline the following data downsizing process.<br>
-<strong>2. Downsampling</strong>: After throwing out missing data (~0.22% of the rows), I downsampled my dataset with respect to my new outcome variable (<code>injurious</code>) using <code>slice_sample()</code>. This reduced the number of observation from over 800,000 to about 220,000<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and also ensured a 50-50 class balance in my dummy outcome variable.<br>
-<strong>3. Downsizing</strong>: While my downsampling-induced shrinkage certainly helped, I felt that a 220,000-row dataset still exceeded my computational limits. I therefore further downsized my sample via random selection using <code>initial_split()</code> to end up with a final dataset exactly 20% as large as the post-downsampling dataset (~44,000 observations). This final dataset was then split into training-testing sets using an <strong>80:20</strong> ratio; I then concluded my data splitting by partioning the ~35,000 training observations into <strong>5 folds repeated 3 times</strong> to generate my resampled data.<br>
-</p>
-<p>Under normal circumstances, I probably should not throw out missing observations and downsample datasets in this manner: perhaps the missing observations are missing on a non-random basis, or perhaps there is a systematic reason behind why the factor levels are so imbalanced. Such statistical focuses, however, are outside the scope of my predictive analysis.</p>
-</section>
-<section id="models-recipes-and-workflows" class="level2">
-<h2 class="anchored" data-anchor-id="models-recipes-and-workflows">Models, Recipes, and Workflows</h2>
-<p>Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.<br>
-</p>
-<p>On models: Boosted tree, random forest, elastic net (ridge OR lasso) [&lt;= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.<br>
-</p>
-<p>On recipes: Don’t just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.</p>
+<div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup> <a href="https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data">City of Chicago Traffic Crashes</a></p></li></div><ol type="1">
+<li><strong>Outcome variable modification</strong>: Instead of predicting the <em>number</em> of individuals emerging injured from a given collision, I now predict <em>whether</em> a given traffic collision will be injurious. This makes my predictive question a <strong>classification</strong>, rather than regression, problem. I made this switch so that I could preserve the injury-focused nature of my initial question and, at the same time, streamline the following data downsizing process.<br>
+</li>
+<li><strong>Downsampling</strong>: After throwing out missing data (~0.22% of the rows), I downsampled my dataset with respect to my new outcome variable (<code>injurious</code>) using <code>slice_sample()</code>. This reduced the number of observation from over 800,000 to about 220,000<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and also ensured a 50-50 class balance in my dummy outcome variable.<br>
+</li>
+<li><strong>Additional downsizing</strong>: While my downsampling-induced shrinkage certainly helped, I felt that a 220,000-row dataset still exceeded my computational limits. I therefore further downsized my sample via random selection using <code>initial_split()</code> to end up with a final dataset exactly 20% as large as the post-downsampling dataset (~44,000 observations). This final dataset was then split into training-testing sets using an <strong>80:20</strong> ratio; I then concluded my data splitting by partioning the ~35,000 training observations into <strong>5 folds repeated 3 times</strong> to generate my resampled data.</li>
+</ol>
+<div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup> The number of observations in the underrepresented outcome variable class — collisions that were injurious — was about 110,000 in the raw dataset</p></li></div><p>Under normal circumstances, I probably should not throw out missing observations and downsample datasets in this manner: perhaps the missing observations are missing on a non-random basis, or perhaps there is a systematic reason behind why the factor levels are so imbalanced. Such statistical focuses, however, are outside the scope of my current predictive analysis.</p>
 </section>
 <section id="null-and-baseline-fits" class="level2">
 <h2 class="anchored" data-anchor-id="null-and-baseline-fits">Null and Baseline Fits</h2>
-<p>[cross-reference this table below just for funsies]</p>
-<p>Mention baseline recipe — you may want to use a simpler recipe — and the 2 models used. Update README accordingly.</p>
+<p>To investigate my predictive classification problem, I have chosen the <strong><code>accuracy</code> assessment metric</strong> for its easy interpretability and compatbility with the binomial nature of my <code>injurious</code> outcome variable. I have defined my 2 basic baseline models (the first being the “true” baseline; the second being a slight upgrade) as the following:<br>
+</p>
+<ol type="1">
+<li><strong>Null model</strong>: A simple, non-informative model defined using <code>null_model()</code> with the <code>parsnip</code> engine and <code>classification</code> mode.<br>
+</li>
+<li><strong>Logistic regression model</strong>: A linear model that accommodates my dummy outcome variable defined using <code>logistic_reg()</code> with the <code>glm</code> engine and <code>classification</code> mode.<br>
+</li>
+</ol>
+<p>These 2 models were merged with a simple recipe: one that predicted <code>injurious</code> using <code>month</code> (of collision), <code>posted_speed_limit</code>, <code>weather_condition</code>, and <code>street_direction</code>, removing any variables with zero variance and then scaling/centering numerical variables. I then fitted the 2 workflows to my 15 resamples/folds:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="fu">here</span>(<span class="st">&quot;results/combined_accuracy.rda&quot;</span>))</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>combined_accuracy <span class="sc">|&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(model) <span class="sc">|&gt;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="tbl-miss-var" class="cell anchored">
+<div id="tbl-fit-resample" class="cell anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-miss-var-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-fit-resample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table 1: Resample fit results for null/baseline and logistic regression models
 </figcaption>
-<div aria-describedby="tbl-miss-var-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-fit-resample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="cell table table-sm table-striped small">
 <colgroup>
@@ -3168,8 +3132,8 @@ Table 1: Resample fit results for null/baseline and logistic regression models
 <col style="width: 15%">
 <col style="width: 13%">
 <col style="width: 4%">
-<col style="width: 13%">
-<col style="width: 28%">
+<col style="width: 12%">
+<col style="width: 29%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -3189,16 +3153,16 @@ Table 1: Resample fit results for null/baseline and logistic regression models
 <td style="text-align: left;">binary</td>
 <td style="text-align: right;">0.5000000</td>
 <td style="text-align: right;">15</td>
-<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.000000</td>
 <td style="text-align: left;">Preprocessor1_Model1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">logistic</td>
 <td style="text-align: left;">accuracy</td>
 <td style="text-align: left;">binary</td>
-<td style="text-align: right;">0.7120703</td>
+<td style="text-align: right;">0.5552975</td>
 <td style="text-align: right;">15</td>
-<td style="text-align: right;">0.0012869</td>
+<td style="text-align: right;">0.001444</td>
 <td style="text-align: left;">Preprocessor1_Model1</td>
 </tr>
 </tbody>
@@ -3208,7 +3172,15 @@ Table 1: Resample fit results for null/baseline and logistic regression models
 </figure>
 </div>
 </div>
-<p><a href="#tbl-miss-var" class="quarto-xref">Table 1</a> bruh moment tells us bruh moment</p>
+<p><a href="#tbl-fit-resample" class="quarto-xref">Table 1</a> displays the fitted results of my 2 simple models: averaged across folds and using the same basic recipe, the null model accurately predicts 50% of the values, while the “step-up” logistic model accurately predicts 55-56%. Clearly, there are improvements that need to be made!</p>
+</section>
+<section id="models-recipes-and-workflows" class="level2">
+<h2 class="anchored" data-anchor-id="models-recipes-and-workflows">Models, Recipes, and Workflows</h2>
+<p>Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.<br>
+</p>
+<p>On models: Boosted tree, random forest, elastic net (ridge OR lasso) [&lt;= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.<br>
+</p>
+<p>On recipes: Don’t just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.</p>
 </section>
 </section>
 <section id="next-steps" class="level1">
