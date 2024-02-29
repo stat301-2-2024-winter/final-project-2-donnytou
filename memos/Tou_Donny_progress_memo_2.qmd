@@ -35,26 +35,24 @@ library(here)
 tidymodels_prefer()
 ```
 
-# Progress Update
-
-## Data Overview/Changes
+# Data Overview/Changes
 Collated from the Chicago Police Department (CPD)^[[City of Chicago Traffic Crashes](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data)], my dataset — in its raw from — consisted of just over 800,000 observations of collision-level data. I quickly realized in the early stages of my predictive modeling process that this was simply way too much data to work with in the context of my time- and computation-based constraints; this, coupled with an imbalance in my initial outcome variable — the number of individuals emerging injured from each traffic collision — led me to pursue the following changes since Progress Memo 1:\
 
 1. **Outcome variable modification**: Instead of predicting the *number* of individuals emerging injured from a given collision, I now predict *whether* a given traffic collision will be injurious. This makes my predictive question a **classification**, rather than regression, problem. I made this switch so that I could preserve the injury-focused nature of my initial question and, at the same time, streamline the following data downsizing process.\
-2. **Downsampling**: After throwing out missing data (~0.22% of the rows), I downsampled my dataset with respect to my new outcome variable (`injurious`) using `slice_sample()`. This reduced the number of observation from over 800,000 to about 220,000^[The number of observations in the underrepresented outcome variable class — collisions that were injurious — was about 110,000 in the raw dataset] and also ensured a 50-50 class balance in my dummy outcome variable.\
+2. **Downsampling**: After throwing out missing data (~0.22% of the rows), I downsampled my dataset with respect to my new outcome variable (`injurious`) using `slice_sample()`. This reduced the number of observation from over 800,000 to about 220,000^[The number of observations in the underrepresented outcome variable class — collisions that *were* injurious — was about 110,000 in the raw dataset] and also ensured a 50-50 class balance in my dummy outcome variable.\
 3. **Additional downsizing**: While my downsampling-induced shrinkage certainly helped, I felt that a 220,000-row dataset still exceeded my computational limits. I therefore further downsized my sample via random selection using `initial_split()` to end up with a final dataset exactly 20% as large as the post-downsampling dataset (~44,000 observations). This final dataset was then split into training-testing sets using an **80:20** ratio; I then concluded my data splitting by partioning the ~35,000 training observations into **5 folds repeated 3 times** to generate my resampled data.
 
 Under normal circumstances, I probably should not throw out missing observations and downsample datasets in this manner: perhaps the missing observations are missing on a non-random basis, or perhaps there is a systematic reason behind why the factor levels are so imbalanced. Such statistical focuses, however, are outside the scope of my current predictive analysis.
 
-## Null and Baseline Fits
+# Null and Baseline Fits
 
 To investigate my predictive classification problem, I have chosen the **`accuracy` assessment metric** for its easy interpretability as well as its compatibility with the binomial nature of my `injurious` outcome variable. I have defined my 2 basic baseline models (the first being the "true" baseline; the second being a slight upgrade) as the following:\
 
 1. **Null model**: A simple, non-informative model defined using `null_model()` with the `parsnip` engine and `classification` mode.\
 2. **Logistic regression model**: A linear model that accommodates my dummy outcome variable defined using `logistic_reg()` with the `glm` engine and `classification` mode.\
 
-These 2 models were merged with a simple recipe: one that predicted `injurious` using `month` (of collision), `posted_speed_limit`, `weather_condition`, and `street_direction`, removing any variables with zero variance and 
-then scaling/centering numerical variables. I then fitted the 2 workflows to my 15 resamples/folds:
+These 2 models were merged with a simple recipe: one that predicted `injurious` using `month` (of collision), `posted_speed_limit`, `weather_condition`, and `street_direction`. This recipe also removed any predictors with zero variance and 
+then centered/scaled numerical variables. I then fitted the 2 baseline model workflows to my 15 resamples/folds, generating the following results:
 ```{r}
 #| label: tbl-fit-resample
 #| tbl-cap: Resample fit results for null/baseline and logistic regression models
@@ -65,14 +63,13 @@ combined_accuracy |>
   knitr::kable()
 ```
 
-@tbl-fit-resample displays the fitted results of my 2 simple models: averaged across folds and using the same basic recipe, the null model accurately predicts 50% of the values, while the "step-up" logistic model accurately predicts 55-56%. Clearly, there are improvements that need to be made!
+@tbl-fit-resample displays the fitted results of my 2 simple models, averaged across folds: using the same basic recipe, the null and logistic models accurately predicted 50% and 55-56% of the of the values respectively. More-complex models and/or better-refined recipes appear to be necessary!
 
-## Models, Recipes, and Workflows
+# Analysis Plan and Next Steps
 
-Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.\
+To prepare my predictive modeling process for a "model competition", I will introduce and define **4 additional model types**: elastic net model with the `glmnet` engine (parametric); K-nearest neighbors model with the `kknn` engine (parametric *and* tree-based); random forest model with the `ranger` engine (tree-based); and boosted tree model with the `xgboost` engine (tree-based). I will take advantage of the complexity of these models by setting tuning ranges for their various hyperparameters so that — following my model competition — I can identify not only the best-performing model type, but also the best-performing *hyperparameters* for this model type. My next steps with regards to this tuning process are:\
 
-On models: Boosted tree, random forest, elastic net (ridge OR lasso) [<= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.\
+**1.** To select the hyperparameters to tune within each of the 4 models;\
+**2.** To define the specific ranges to explore for each hyperparameter
 
-On recipes: Don't just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.
-
-# Next Steps
+Recipe-wise, I will define (in addition to the simple recipe I used above to fit my baseline models) **4 new recipes**: 2 variants for my parametric models (elastic net and KNN), and 2 variants for my tree-based models (random forest, boosted tree, and KNN). A *potential concern* with this featuring step is that I am given a large amount (50+) of predictors: I want to take advantage of this large amount, but only to a *reasonable extent*: I do not want to include variables that see excessive missingness (> 80%) and/or are perfectly correlated with my outcome variable, `injurious`. I also want to be *actively careful* about my feature selection and not just ignore predictors that are obviously untenable: to this end, I will carefully select my predictor variables through feature extraction using lasso regressions and also conduct a more thorough general EDA process to pinpoint predictors for my outcome variable. Using this framework, my goal is to select **~15** predictors on average for use across my 4 recipes. 

@@ -10,6 +10,10 @@ tidymodels_prefer()
 load(here("data/traffic_train.rda"))
 load(here("data/traffic_data_throwaway.rda"))
 
+# background job for mac
+library(doMC)
+registerDoMC(parallel::detectCores(logical = TRUE))
+
 # feature selection using logistic lasso
 feature_spec <- logistic_reg(penalty = 0.01, mixture = 1) |>
   set_engine("glmnet") |>
@@ -20,6 +24,7 @@ feature_recipe <- recipe(
 ) |>
   step_rm(
     starts_with("injuries"),
+    starts_with("work"),
     crash_time,
     crash_date_new,
     most_severe_injury,
@@ -33,10 +38,7 @@ feature_recipe <- recipe(
     crash_record_id,
     beat_of_occurrence,
     crash_type,
-    workers_present_i,
     dooring_i,
-    work_zone_type,
-    work_zone_i,
     photos_taken_i,
     statements_taken_i,
     not_right_of_way_i,
@@ -45,19 +47,30 @@ feature_recipe <- recipe(
   ) |>
   step_impute_knn(
     hit_and_run_i,
+    lane_cnt,
+    intersection_related_i,
     report_type,
     latitude,
     longitude,
     street_direction
   ) |>
-  step_dummy(all_nominal_predictors())
+  step_dummy(all_nominal_predictors()) |>
+  step_normalize(all_numeric_predictors())
 feature_wflow <- workflow() |>
   add_recipe(feature_recipe) |>
   add_model(feature_spec)
-feature_fit <- fit(feature_wflow, traffic_data_throwaway)
-feature_fit |> 
-  extract_fit_engine() |>
-  summary()
+traffic_data_throwaway_downsized <- initial_split(
+  traffic_data_throwaway,
+  prop = 0.2
+) |>
+  training()
+feature_fit <- fit(feature_wflow, traffic_data_throwaway_downsized)
+save(
+  feature_fit,
+  file = here("feature_fit.rda")
+)
+coef(feature_fit |>
+       extract_fit_engine())
 
 # build baseline recipe 
 traffic_recipe_baseline <- recipe(
@@ -72,6 +85,55 @@ traffic_recipe_baseline <- recipe(
 # check recipe
 prep(traffic_recipe_baseline) |>
   bake(new_data = NULL)
+
+### build parametric recipes: linear regression, elastic net model, k-nearest neighbor ---------
+# variant 1
+traffic_recipe_log1 <- recipe(
+  injurious ~ year + month + weekday + hour + traffic_control_device_i + num_units + street_direction + damage + hit_and_run_i + intersection_related_i + alignment + lane_cnt + speed_limit + device_condition + weather_condition + lighting_condition + latitude + longitude,
+  data = traffic_train |>
+    rename(
+      weekday = crash_day_of_week,
+      speed_limit = posted_speed_limit
+    )
+) |>
+  step_zv(all_predictors()) |>
+  step_impute_knn(
+    lane_cnt,
+    hit_and_run_i,
+    intersection_related_i,
+    latitude,
+    longitude
+  ) |>
+  step_dummy(all_nominal_predictors()) |>
+  step_interact() |> 
+  step_normalize(all_numerical_predictors())
+# variant 2
+### change: interaction terms, predictors
+traffic_recipe_log2 <- recipe(
+  
+)
+
+### build non-parametric recipes: random forest, boosted trees, k-nearest neighbor ---------
+# variant 1
+traffic_recipe_tree1 <- recipe(
+  injurious ~ year + month + weekday + hour + traffic_control_device_i + num_units + street_direction + damage + hit_and_run_i + intersection_related_i + alignment + lane_cnt + speed_limit + device_condition + weather_condition + lighting_condition + latitude + longitude,
+  data = traffic_train |>
+    rename(
+      weekday = crash_day_of_week,
+      speed_limit = posted_speed_limit
+    )
+) |>
+  step_zv(all_predictors()) |>
+  step_impute_knn(
+    lane_cnt,
+    hit_and_run_i,
+    intersection_related_i,
+    latitude,
+    longitude
+  ) |>
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) |>
+  step_normalize(all_numerical_predictors())
+# variant 2
 
 # save recipe
 save(

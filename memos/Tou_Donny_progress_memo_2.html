@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Donny Tou">
-<meta name="dcterms.date" content="2024-02-26">
+<meta name="dcterms.date" content="2024-02-28">
 
 <title>Progress Memo 2</title>
 <style>
@@ -3033,13 +3033,9 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#progress-update" id="toc-progress-update" class="nav-link active" data-scroll-target="#progress-update">Progress Update</a>
-  <ul class="collapse">
-  <li><a href="#data-overviewchanges" id="toc-data-overviewchanges" class="nav-link" data-scroll-target="#data-overviewchanges">Data Overview/Changes</a></li>
+  <li><a href="#data-overviewchanges" id="toc-data-overviewchanges" class="nav-link active" data-scroll-target="#data-overviewchanges">Data Overview/Changes</a></li>
   <li><a href="#null-and-baseline-fits" id="toc-null-and-baseline-fits" class="nav-link" data-scroll-target="#null-and-baseline-fits">Null and Baseline Fits</a></li>
-  <li><a href="#models-recipes-and-workflows" id="toc-models-recipes-and-workflows" class="nav-link" data-scroll-target="#models-recipes-and-workflows">Models, Recipes, and Workflows</a></li>
-  </ul></li>
-  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
+  <li><a href="#analysis-plan-and-next-steps" id="toc-analysis-plan-and-next-steps" class="nav-link" data-scroll-target="#analysis-plan-and-next-steps">Analysis Plan and Next Steps</a></li>
   </ul>
 </nav>
 </div>
@@ -3066,7 +3062,7 @@ Data Science 2 with R (STAT 301-2)</div><p></p>
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 26, 2024</p>
+      <p class="date">February 28, 2024</p>
     </div>
   </div>
   
@@ -3091,10 +3087,8 @@ Github Repo Link
 <p><a href="https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git">Donny’s Final Project Repo</a></p>
 </div>
 </div>
-<section id="progress-update" class="level1 page-columns page-full">
-<h1>Progress Update</h1>
-<section id="data-overviewchanges" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="data-overviewchanges">Data Overview/Changes</h2>
+<section id="data-overviewchanges" class="level1 page-columns page-full">
+<h1>Data Overview/Changes</h1>
 <p>Collated from the Chicago Police Department (CPD)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, my dataset — in its raw from — consisted of just over 800,000 observations of collision-level data. I quickly realized in the early stages of my predictive modeling process that this was simply way too much data to work with in the context of my time- and computation-based constraints; this, coupled with an imbalance in my initial outcome variable — the number of individuals emerging injured from each traffic collision — led me to pursue the following changes since Progress Memo 1:<br>
 </p>
 <div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup> <a href="https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data">City of Chicago Traffic Crashes</a></p></li></div><ol type="1">
@@ -3104,10 +3098,10 @@ Github Repo Link
 </li>
 <li><strong>Additional downsizing</strong>: While my downsampling-induced shrinkage certainly helped, I felt that a 220,000-row dataset still exceeded my computational limits. I therefore further downsized my sample via random selection using <code>initial_split()</code> to end up with a final dataset exactly 20% as large as the post-downsampling dataset (~44,000 observations). This final dataset was then split into training-testing sets using an <strong>80:20</strong> ratio; I then concluded my data splitting by partioning the ~35,000 training observations into <strong>5 folds repeated 3 times</strong> to generate my resampled data.</li>
 </ol>
-<div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup> The number of observations in the underrepresented outcome variable class — collisions that were injurious — was about 110,000 in the raw dataset</p></li></div><p>Under normal circumstances, I probably should not throw out missing observations and downsample datasets in this manner: perhaps the missing observations are missing on a non-random basis, or perhaps there is a systematic reason behind why the factor levels are so imbalanced. Such statistical focuses, however, are outside the scope of my current predictive analysis.</p>
+<div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup> The number of observations in the underrepresented outcome variable class — collisions that <em>were</em> injurious — was about 110,000 in the raw dataset</p></li></div><p>Under normal circumstances, I probably should not throw out missing observations and downsample datasets in this manner: perhaps the missing observations are missing on a non-random basis, or perhaps there is a systematic reason behind why the factor levels are so imbalanced. Such statistical focuses, however, are outside the scope of my current predictive analysis.</p>
 </section>
-<section id="null-and-baseline-fits" class="level2">
-<h2 class="anchored" data-anchor-id="null-and-baseline-fits">Null and Baseline Fits</h2>
+<section id="null-and-baseline-fits" class="level1">
+<h1>Null and Baseline Fits</h1>
 <p>To investigate my predictive classification problem, I have chosen the <strong><code>accuracy</code> assessment metric</strong> for its easy interpretability as well as its compatibility with the binomial nature of my <code>injurious</code> outcome variable. I have defined my 2 basic baseline models (the first being the “true” baseline; the second being a slight upgrade) as the following:<br>
 </p>
 <ol type="1">
@@ -3116,7 +3110,7 @@ Github Repo Link
 <li><strong>Logistic regression model</strong>: A linear model that accommodates my dummy outcome variable defined using <code>logistic_reg()</code> with the <code>glm</code> engine and <code>classification</code> mode.<br>
 </li>
 </ol>
-<p>These 2 models were merged with a simple recipe: one that predicted <code>injurious</code> using <code>month</code> (of collision), <code>posted_speed_limit</code>, <code>weather_condition</code>, and <code>street_direction</code>, removing any variables with zero variance and then scaling/centering numerical variables. I then fitted the 2 workflows to my 15 resamples/folds:</p>
+<p>These 2 models were merged with a simple recipe: one that predicted <code>injurious</code> using <code>month</code> (of collision), <code>posted_speed_limit</code>, <code>weather_condition</code>, and <code>street_direction</code>. This recipe also removed any predictors with zero variance and then centered/scaled numerical variables. I then fitted the 2 baseline model workflows to my 15 resamples/folds, generating the following results:</p>
 <div class="cell">
 <div id="tbl-fit-resample" class="cell anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -3172,19 +3166,15 @@ Table 1: Resample fit results for null/baseline and logistic regression models
 </figure>
 </div>
 </div>
-<p><a href="#tbl-fit-resample" class="quarto-xref">Table 1</a> displays the fitted results of my 2 simple models: averaged across folds and using the same basic recipe, the null model accurately predicts 50% of the values, while the “step-up” logistic model accurately predicts 55-56%. Clearly, there are improvements that need to be made!</p>
+<p><a href="#tbl-fit-resample" class="quarto-xref">Table 1</a> displays the fitted results of my 2 simple models, averaged across folds: using the same basic recipe, the null and logistic models accurately predicted 50% and 55-56% of the of the values respectively. More-complex models and/or better-refined recipes appear to be necessary!</p>
 </section>
-<section id="models-recipes-and-workflows" class="level2">
-<h2 class="anchored" data-anchor-id="models-recipes-and-workflows">Models, Recipes, and Workflows</h2>
-<p>Map out which ≥4 other model types you will use (see previous labs!) and the ≥2 recipes you will have, many of which will be customized based on model type (also see previous labs!). Also map out the various tuning hyperparameters you will attach to particular models. Make sure all of these are displayed in the form of place-holder R scripts.<br>
+<section id="analysis-plan-and-next-steps" class="level1">
+<h1>Analysis Plan and Next Steps</h1>
+<p>To prepare my predictive modeling process for a “model competition”, I will introduce and define <strong>4 additional model types</strong>: elastic net model with the <code>glmnet</code> engine (parametric); K-nearest neighbors model with the <code>kknn</code> engine (parametric <em>and</em> tree-based); random forest model with the <code>ranger</code> engine (tree-based); and boosted tree model with the <code>xgboost</code> engine (tree-based). I will take advantage of the complexity of these models by setting tuning ranges for their various hyperparameters so that — following my model competition — I can identify not only the best-performing model type, but also the best-performing <em>hyperparameters</em> for this model type. My next steps with regards to this tuning process are:<br>
 </p>
-<p>On models: Boosted tree, random forest, elastic net (ridge OR lasso) [&lt;= TAKE ADVANTAGE BY TUNING MIXTURES], KNN.<br>
-</p>
-<p>On recipes: Don’t just have different recipes for different models; try to have 2 variants FOR EACH model. Aim for 5 total recipes: 2-3 recipes for a linear model; 2-3 recipes for tree-based model. Review prior labs to see model recipes.</p>
-</section>
-</section>
-<section id="next-steps" class="level1">
-<h1>Next Steps</h1>
+<p><strong>1.</strong> To select the hyperparameters to tune within each of the 4 models;<br>
+<strong>2.</strong> To define the specific ranges to explore for each hyperparameter</p>
+<p>Recipe-wise, I will define (in addition to the simple recipe I used above to fit my baseline models) <strong>4 new recipes</strong>: 2 variants for my parametric models (elastic net and KNN), and 2 variants for my tree-based models (random forest, boosted tree, and KNN). A <em>potential concern</em> with this featuring step is that I am given a large amount (50+) of predictors: I want to take advantage of this large amount, but only to a <em>reasonable extent</em>: I do not want to include variables that see excessive missingness (&gt; 80%) and/or are perfectly correlated with my outcome variable, <code>injurious</code>. I also want to be <em>actively careful</em> about my feature selection and not just ignore predictors that are obviously untenable: to this end, I will carefully select my predictor variables through feature extraction using lasso regressions and also conduct a more thorough general EDA process to pinpoint predictors for my outcome variable. Using this framework, my goal is to select <strong>~15</strong> predictors on average for use across my 4 recipes.</p>
 </section>
 
 
