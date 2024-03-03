@@ -8,7 +8,6 @@ tidymodels_prefer()
 
 # load data
 load(here("data/traffic_train.rda"))
-load(here("data/traffic_data_throwaway.rda"))
 
 # background job for mac
 library(doMC)
@@ -112,14 +111,14 @@ recipe2_parametric <- recipe(
   ) |>
   step_dummy(all_nominal_predictors()) |>
   step_interact(terms = ~ starts_with("lighting_condition_"):num_units) |>
+  step_interact(terms = ~ starts_with("trafficway_type_"):num_units) |>
   step_interact(terms = ~ starts_with("lighting_condition_"):starts_with("alignment_")) |>
-  step_interact(terms = ~ starts_with("device_condition_"):num_units) |>
-  step_interact(terms = ~ starts_with("intersection_related_i_"):num_units) |>
+  step_interact(terms = ~ starts_with("intersection_related_i_"):starts_with("alignment_")) |>
   step_zv(all_predictors()) |>
   step_normalize(all_numeric_predictors())
 ### check recipe
-prep(recipe2_parametric) |>
-  bake(new_data = NULL)
+glimpse(prep(recipe2_parametric) |>
+  bake(new_data = NULL))
 
 # non-parametric/tree-based recipes ------------
 ### baseline kitchen sink recipe
@@ -179,7 +178,8 @@ recipe2_tree <- recipe(
     report_type
   ) |>
   step_dummy(
-    all_nominal_predictors(), one_hot = TRUE
+    all_nominal_predictors(), 
+    one_hot = TRUE
   ) |>
   step_zv(all_predictors()) |>
   step_normalize(all_numeric_predictors())
@@ -188,3 +188,23 @@ prep(recipe2_tree) |>
   bake(new_data = NULL)
 
 # save recipes
+save(
+  recipe1_parametric,
+  file = here("recipes/recipe1_parametric.rda")
+)
+save(
+  recipe_naive,
+  file = here("recipes/recipe_naive.rda")
+)
+save(
+  recipe2_parametric,
+  file = here("recipes/recipe2_parametric.rda")
+)
+save(
+  recipe1_tree,
+  file = here("recipes/recipe1_tree.rda")
+)
+save(
+  recipe2_tree,
+  file = here("recipes/recipe2_tree.rda")
+)

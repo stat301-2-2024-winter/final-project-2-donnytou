@@ -4,37 +4,37 @@ library(tidymodels)
 library(here)
 
 # load data
-load(here("data/traffic_train.rda"))
+load(here("data/traffic_data_throwaway.rda"))
 
 # bivariate analysis: initial feature selection
 ### bivariate EDA functions
 barchart_func <- function(x) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes(x = {{ x }})) +
     geom_bar() +
     facet_wrap(vars(injurious)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 barchart_func2 <- function(x) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes(x = {{ x }}, fill = injurious)) +
     geom_bar(position = "fill") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 histogram_func <- function(x) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes(x = {{ x }})) +
     geom_histogram() +
     facet_wrap(vars(injurious)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 boxplot_func <- function(x) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes(x = injurious, y = {{ x }})) +
     geom_boxplot()
 }
 table_func <- function(x) {
-  traffic_train |>
+  traffic_data_throwaway |>
     summarize(
       mean({{ x }}, na.rm = TRUE),
       .by = injurious
@@ -78,21 +78,21 @@ table_func(crash_day_of_week)
 # multivariate analysis: interaction term selection
 ### multivariate EDA functions
 barchart_new <- function(x, y) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes({{ x }}, fill = injurious)) +
     geom_bar(position = "fill") +
     facet_wrap(vars({{ y }})) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 histogram_new <- function(x, y) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes({{ x }}, fill = injurious)) +
     geom_histogram(position = "fill", color = "black") +
     facet_wrap(vars({{ y }})) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 scatterplot_new <- function(x, y) {
-  traffic_train |>
+  traffic_data_throwaway |>
     ggplot(aes({{ x }}, {{ y }})) +
     geom_point() +
     geom_smooth(method = "lm") +
@@ -100,10 +100,12 @@ scatterplot_new <- function(x, y) {
 }
 ### chosen predictors (11): `alignment`, `posted_speed_limit`, `lane_cnt`, `device_condition`, `month`, `intersection_related_i`, `lighting_condition`, `trafficway_type`, `first_crash_type`, `report_type`, `num_units`
 ### internal ("number of units involved") and external interactions
-barchart_func2(num_units)
-barchart_new(num_units, intersection_related_i)
-barchart_new(num_units, device_condition)
 barchart_new(num_units, lighting_condition)
+barchart_new(num_units, trafficway_type)
 ### external and external interactions
-barchart_func2(alignment)
 barchart_new(alignment, lighting_condition)
+barchart_new(alignment, intersection_related_i)
+### collison variables
+barchart_func2(first_crash_type)
+
+
