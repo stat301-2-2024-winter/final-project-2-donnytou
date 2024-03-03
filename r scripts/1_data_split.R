@@ -10,6 +10,7 @@ tidymodels_prefer()
 load(here("data/traffic_data_updated.rda"))
 
 # downsampling using dplyr
+set.seed(1)
 traffic_downsampled <- traffic_data_updated |>
   filter(!is.na(injurious)) |>
   slice_sample(

@@ -1,5 +1,6 @@
 # load packages
 library(tidyverse) 
+library(tidymodels)
 library(here)
 library(naniar)
 library(DT)
