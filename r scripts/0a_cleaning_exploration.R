@@ -105,8 +105,8 @@ save(
 
 # missingness exploration — whole dataset
 load(here("data/traffic_data_cleaned.rda"))
-missing_table <- miss_var_summary(traffic_data_cleaned) 
-datatable(missing_table)
+missing_table <- naniar::miss_var_summary(traffic_data_cleaned) 
+DT::datatable(missing_table)
 missing_names <- missing_table |>
   pull(variable)
 traffic_data_cleaned |>
