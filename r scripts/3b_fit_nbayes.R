@@ -12,7 +12,7 @@ registerDoMC(parallel::detectCores(logical = TRUE))
 
 # load data and recipe
 load(here("data/traffic_fold.rda"))
-load(here("recipes/recipe1_parametric.rda"))
+load(here("recipes/traffic_recipe_baseline.rda"))
 
 # model specification
 null_spec <- null_model() |>
@@ -21,7 +21,7 @@ null_spec <- null_model() |>
 
 # create workflow
 null_wflow <- workflow() |>
-  add_recipe(recipe1_parametric) |>
+  add_recipe(traffic_recipe_baseline) |>
   add_model(null_spec)
 
 # fit to folds
