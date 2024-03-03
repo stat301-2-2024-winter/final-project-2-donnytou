@@ -32,6 +32,8 @@ logistic_fit1 <- fit_resamples(
   logistic_wflow1,
   traffic_fold
 )
+registerDoMC(parallel::detectCores(logical = TRUE))
+set.seed(2)
 logistic_fit2 <- fit_resamples(
   logistic_wflow2,
   traffic_fold

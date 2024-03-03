@@ -2,6 +2,7 @@
 library(tidyverse)
 library(tidymodels)
 library(here)
+library(discrim)
 
 # handle common conflicts
 tidymodels_prefer()

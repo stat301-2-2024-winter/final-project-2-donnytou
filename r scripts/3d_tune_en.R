@@ -45,6 +45,8 @@ en_tuned1 <- en_wflow1 |>
     grid = en_grid,
     control = control_grid(save_workflow = TRUE)
   )
+registerDoMC(parallel::detectCores(logical = TRUE))
+set.seed(2)
 en_tuned2 <- en_wflow2 |>
   tune_grid(
     traffic_fold,

@@ -8,7 +8,11 @@ tidymodels_prefer()
 
 # load fitted models
 load(here("results/null_fit.rda"))
-load(here("results/logistic_fit.rda"))
+load(here("results/nbayes_fit.rda"))
+load(here("results/logistic_fit1.rda"))
+load(here("results/logistic_fit2.rda"))
+load(here("results/en_tuned1.rda"))
+load(here("results/en_tuned2.rda"))
 
 # extract accuracy metrics --> combine into one table
 ### null fit
@@ -16,33 +20,49 @@ null_accuracy <- null_fit |>
   collect_metrics() |>
   filter(.metric == "accuracy") |>
   mutate(model = "null")
-### logistic fit
-logistic_accuracy <- logistic_fit |>
+### naive Bayes
+nbayes_accuracy <- nbayes_fit |>
   collect_metrics() |>
   filter(.metric == "accuracy") |>
-  mutate(model = "logistic")
-### elastic net fit
+  mutate(model = "nbayes")
+### logistic fit — kitchen sink
+logistic_accuracy1 <- logistic_fit1 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  mutate(model = "logistic1")
+### logistic fit — feature engineered
+logistic_accuracy2 <- logistic_fit2 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  mutate(model = "logistic2")
+### elastic net fit — kitchen sink
+en_accuracy1 <- en_tuned1 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "en1")
+### elastic net fit — feature engineered
+en_accuracy2 <- en_tuned2 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "en2")
 ### nearest neighbors fit
 ### random forest fit
 ### boosted tree fit
 ### combined fit
 combined_accuracy <- bind_rows(
   null_accuracy,
-  logistic_accuracy
+  nbayes_accuracy,
+  logistic_accuracy1,
+  logistic_accuracy2,
+  en_accuracy1,
+  en_accuracy2
 )
 
 # saving out results
-save(
-  null_accuracy,
-  file = here("results/null_accuracy.rda")
-)
-save(
-  logistic_accuracy,
-  file = here("results/logistic_accuracy.rda")
-)
-save(
-  combined_accuracy,
-  file = here("results/combined_accuracy.rda")
-)
+
 
 

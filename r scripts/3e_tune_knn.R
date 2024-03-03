@@ -31,7 +31,7 @@ knn_params <- extract_parameter_set_dials(knn_spec) |>
   update(
     neighbors = neighbors(c(1, 25))
   )
-knn_grid <- grid_regular(knn_params, levels = 8)
+knn_grid <- grid_regular(knn_params, levels = 10)
 
 # fit to folds
 library(doMC)
@@ -43,6 +43,8 @@ knn_tuned1 <- knn_wflow1 |>
     grid = knn_grid,
     control = control_grid(save_workflow = TRUE)
   )
+registerDoMC(parallel::detectCores(logical = TRUE))
+set.seed(2)
 knn_tuned2 <- knn_wflow2 |>
   tune_grid(
     traffic_fold,
