@@ -46,6 +46,8 @@ rf_tuned1 <- rf_wflow1 |>
     grid = rf_grid,
     control = control_grid(save_workflow = TRUE)
   )
+registerDoMC(parallel::detectCores(logical = TRUE))
+set.seed(2)
 rf_tuned2 <- rf_wflow2 |>
   tune_grid(
     traffic_fold,
