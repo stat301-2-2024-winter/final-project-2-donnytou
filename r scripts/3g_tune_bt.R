@@ -13,7 +13,7 @@ load(here("recipes/recipe2_tree.rda"))
 
 # model specification
 boosted_spec <- boost_tree(
-  trees = tune(),
+  trees = 500,
   mtry = tune(),
   min_n = tune(),
   learn_rate = tune()
@@ -32,12 +32,11 @@ boosted_wflow2 <- workflow() |>
 # update hyperparameter ranges, build tuning grid
 boosted_params <- extract_parameter_set_dials(boosted_spec) |>
   update(
-    trees = trees(c(100, 1000)),
-    mtry = mtry(c(1,5)),
+    mtry = mtry(c(1, 5)),
     min_n = min_n(c(2, 40)),
     learn_rate = learn_rate(c(-5, -0.2))
   )
-boosted_grid <- grid_regular(boosted_params, levels = c(4, 5, 4, 10))
+boosted_grid <- grid_regular(boosted_params, levels = 4)
 
 # fit to folds
 library(doMC)

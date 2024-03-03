@@ -15,7 +15,7 @@ load(here("recipes/recipe2_tree.rda"))
 rf_spec <- rand_forest(
   mtry = tune(),
   min_n = tune(),
-  trees = 1000
+  trees = 500
 ) |>
   set_engine("ranger") |>
   set_mode("classification")
@@ -31,7 +31,7 @@ rf_wflow2 <- workflow() |>
 # update hyperparameter ranges, build tuning grid
 rf_params <- extract_parameter_set_dials(rf_spec) |>
   update(
-    mtry = mtry(c(1,10)),
+    mtry = mtry(c(1,5)),
     min_n = min_n(c(2, 40))
   )
 rf_grid <- grid_regular(rf_params, levels = 4)

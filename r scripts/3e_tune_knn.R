@@ -29,9 +29,9 @@ knn_wflow2 <- workflow() |>
 # update hyperparameter ranges, build tuning grid
 knn_params <- extract_parameter_set_dials(knn_spec) |>
   update(
-    neighbors = neighbors(c(1, 25))
+    neighbors = neighbors(c(1, 15))
   )
-knn_grid <- grid_regular(knn_params, levels = 10)
+knn_grid <- grid_regular(knn_params, levels = 5)
 
 # fit to folds
 library(doMC)
