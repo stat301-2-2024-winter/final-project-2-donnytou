@@ -13,9 +13,9 @@ load(here("recipes/recipe2_tree.rda"))
 
 # model specification
 rf_spec <- rand_forest(
+  trees = 500,
   mtry = tune(),
-  min_n = tune(),
-  trees = 500
+  min_n = tune()
 ) |>
   set_engine("ranger") |>
   set_mode("classification")
