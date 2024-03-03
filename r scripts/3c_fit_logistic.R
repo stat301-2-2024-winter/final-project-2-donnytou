@@ -6,33 +6,43 @@ library(here)
 # handle common conflicts
 tidymodels_prefer()
 
-# background job for mac
-library(doMC)
-registerDoMC(parallel::detectCores(logical = TRUE))
-
-# load data and recipe
+# load data and recipes
 load(here("data/traffic_fold.rda"))
-load(here("recipes/traffic_recipe_baseline.rda"))
+load(here("recipes/recipe1_parametric.rda"))
+load(here("recipes/recipe2_parametric.rda"))
 
 # model specification
 logistic_spec <- logistic_reg() |>
   set_engine("glm") |>
   set_mode("classification")
 
-# create workflow
-logistic_wflow <- workflow() |>
-  add_recipe(traffic_recipe_baseline) |>
+# create workflows
+logistic_wflow1 <- workflow() |>
+  add_recipe(recipe1_parametric) |>
   add_model(logistic_spec) 
+logistic_wflow2 <- workflow() |>
+  add_recipe(recipe2_parametric) |>
+  add_model(logistic_spec)
 
 # fit to folds
+library(doMC)
+registerDoMC(parallel::detectCores(logical = TRUE))
 set.seed(2)
-logistic_fit <- fit_resamples(
-  logistic_wflow,
+logistic_fit1 <- fit_resamples(
+  logistic_wflow1,
+  traffic_fold
+)
+logistic_fit2 <- fit_resamples(
+  logistic_wflow2,
   traffic_fold
 )
 
 # save out fitted workflow
 save(
-  logistic_fit,
-  file = here("results/logistic_fit.rda")
+  logistic_fit1,
+  file = here("results/logistic_fit1.rda")
+)
+save(
+  logistic_fit2,
+  file = here("results/logistic_fit2.rda")
 )

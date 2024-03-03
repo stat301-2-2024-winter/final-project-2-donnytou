@@ -6,10 +6,6 @@ library(here)
 # handle common conflicts
 tidymodels_prefer()
 
-# background job for mac
-library(doMC)
-registerDoMC(parallel::detectCores(logical = TRUE))
-
 # load data and recipe
 load(here("data/traffic_fold.rda"))
 load(here("recipes/recipe1_parametric.rda"))
@@ -25,6 +21,8 @@ null_wflow <- workflow() |>
   add_model(null_spec)
 
 # fit to folds
+library(doMC)
+registerDoMC(parallel::detectCores(logical = TRUE))
 set.seed(2)
 null_fit <- fit_resamples(
   null_wflow,
