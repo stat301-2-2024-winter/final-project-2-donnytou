@@ -13,6 +13,12 @@ load(here("results/logistic_fit1.rda"))
 load(here("results/logistic_fit2.rda"))
 load(here("results/en_tuned1.rda"))
 load(here("results/en_tuned2.rda"))
+load(here("results/knn_tuned1.rda"))
+load(here("results/knn_tuned2.rda"))
+load(here("results/rf_tuned1.rda"))
+load(here("results/rf_tuned2.rda"))
+load(here("results/boosted_tuned1.rda"))
+load(here("results/boosted_tuned2.rda"))
 
 # extract accuracy metrics --> combine into one table
 ### null fit
@@ -49,9 +55,48 @@ en_accuracy2 <- en_tuned2 |>
   arrange(desc(mean)) |>
   slice_head(n = 1) |>
   mutate(model = "en2")
-### nearest neighbors fit
-### random forest fit
-### boosted tree fit
+### nearest neighbors fit — kitchen sink
+knn_accuracy1 <- knn_tuned1 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "knn1")
+### nearest neighbors fit — feature engineered
+knn_accuracy2 <- knn_tuned2 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "knn2")
+### random forest fit — kitchen sink
+rf_accuracy1 <- rf_tuned1 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "rf1")
+### random forest fit — feature engineered
+rf_accuracy2 <- rf_tuned2 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "rf2")
+### boosted tree fit — kitchen sink
+boosted_accuracy1 <- boosted_tuned1 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "boosted1")
+### boosted tree fit — feature engineered
+boosted_accuracy2 <- boosted_tuned2 |>
+  collect_metrics() |>
+  filter(.metric == "accuracy") |>
+  arrange(desc(mean)) |>
+  slice_head(n = 1) |>
+  mutate(model = "boosted2")
 ### combined fit
 combined_accuracy <- bind_rows(
   null_accuracy,
@@ -59,7 +104,13 @@ combined_accuracy <- bind_rows(
   logistic_accuracy1,
   logistic_accuracy2,
   en_accuracy1,
-  en_accuracy2
+  en_accuracy2,
+  knn_accuracy1,
+  knn_accuracy2,
+  rf_accuracy1,
+  rf_accuracy2,
+  boosted_accuracy1,
+  boosted_accuracy2
 )
 
 # saving out results
