@@ -111,9 +111,20 @@ combined_accuracy <- bind_rows(
   rf_accuracy2,
   boosted_accuracy1,
   boosted_accuracy2
-)
+) |>
+  select(
+    model,
+    .metric,
+    .estimator,
+    mean,
+    std_err,
+    n
+  )
 
 # saving out results
-
+save(
+  combined_accuracy,
+  file = here("results/combined_accuracy.rda")
+)
 
 
