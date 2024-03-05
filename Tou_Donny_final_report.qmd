@@ -1,0 +1,149 @@
+---
+title: "Predicting the Injuriousness of Traffic Collisions Occuring in the City of Chicago: A Final Report"
+subtitle: |
+  | Final Project 
+  | Data Science 2 with R (STAT 301-2)
+author: "Donny Tou"
+date: today
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji 
+reference-location: margin
+citation-location: margin
+---
+
+::: {.callout-tip icon=false}
+## Github Repo Link
+
+[Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
+:::
+
+```{r}
+#| echo: false
+# load packages
+library(tidyverse) 
+library(tidymodels)
+library(here)
+library(naniar)
+library(DT)
+library(knitr)
+
+# handle common conflicts
+tidymodels_prefer()
+```
+
+
+## Introduction
+
+In this project, I will investigate the following predictive question: **will any of the unfortunate individuals involved in a traffic collision — both motorists and non-motorists alike — emerge injured?** This is a *classification* problem because it investigates a question of *whether* a traffic incident will be injurious instead of *how many* people are injured.
+
+I want to investigate this predictive problem in particular because of the ubiquity of driving: in fact, for most Americans, driving is the primary means by which to commute in day-to-day life. More than 80 percent of U.S. adults are licensed drivers, with over 90 percent using motor vehicles to transport themselves to-and-from work (Hedges & Company, 2018; Dews, 2013). Driving is relatively cheap and time-efficient, providing individuals with a large amount of geographic freedom and autonomy. Yet, there are **significant costs** to driving: more cars on the road often corresponds to a higher frequency of traffic collisions, many of which can result in debilitating injuries and even death. In fact, the U.S. experiences more motor-vehicle fatalities in both absolute and per-capita terms than any other high-income country (Yellman & Sauber-Schatz, 2022). In attempting to predict the "price tag" of driving (in the form of injurious collisions), I hope to minimize the heavy costs associated with an activity that has become so prevalent in, and important to, daily life.
+
+To build my predictive modelling process, I will be analyzing collision-level crash data covering **traffic incidents occurring within City of Chicago limits and under the jurisdiction of the Chicago Police Department since 2015**^[[City of Chicago Traffic Crashes](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data)]. Approximately half of the observations are self-reported at the police district by the agent(s) involved; the other half are recorded by the responding police officer. 
+
+## Data Overview
+
+In its raw form, my dataset on Chicago traffic collisions describes over 800,000 crashes with **50 columns** which — after basic cleaning (cleaning column names, factorizing relevant variables, collapsing factor levels) — consist of 26 factor variables, 17 integer variables, 5 string variables, and 1 logical variable. A dataset-wide missingness analysis reveals the following results:
+
+```{r}
+#| echo: false
+#| label: tbl-miss-var
+#| tbl-cap: Total missingness for each of the 50 variables, summarized
+load(here("plots/missing_table.rda"))
+missing_table |>
+  DT::datatable()
+```
+```{r}
+#| echo: false
+#| label: fig-miss-var
+#| fig-cap: Total missingness for each of the 50 variables, visualized
+load(here("plots/missing_visual.rda"))
+missing_visual
+```
+@tbl-miss-var reinforces @fig-miss-var by showing that 11/50 variables in our data see a missingness rate of over 65%, with the top 8 seeing missing values for over 90% of the entire dataset — a magnitude of missingness that is certainly concerning, especially since it limits my flexibility for feature engineering/selection. Fortunately, the rate of missingness drops precipitously for the remaining 39 variables, which see either zero or close-to-zero missingness. 
+
+To construct my **outcome variable of interest**, I condition it using `if_else()` on one of the preexisting variables, `injuries_total`, which is an integer measurement of the *number* of individuals sustaining fatal, incapacitating, non-incapacitating, or possible injuries within a given traffic collision. The resulting binary outcome variable — `injurious` — is appended to the dataset as a new column and is coded as:\
+• `Yes` if `injuries_total` exceeds zero;\
+• `No` if `injuries_total` equals zero; and\
+• `NA` if `injuries_total` is a missing value
+
+I have chosen to take the "classification route" with the new `injurious` variable — as opposed to the "regression route" with existing `injuries_total` variable — so as to preserve the injury-focused nature of my initial question whilst, at the same time, streamline the data downsizing/balancing process (which will be described in the following section).
+
+The following exhibits will explore the missingness and distribution of my `injurious` outcome variable using the original data:
+
+```{r}
+#| echo: false
+#| label: tbl-miss-injurious
+#| tbl-cap: Extent of missingness for outcome variable `injurious`
+load(here("plots/missing_outcome.rda"))
+missing_injurious 
+```
+The outcome variable `injurious` fortunately sees a missingness rate of only 0.22% (@tbl-miss-injurious), which means that the process of "throwing out" missing values during recipe building should not generate significant disruptions/bias. Next, I will explore the distribution of `injurious` across the raw dataset after excluding the 1,757 (out of 803,144) observations that lack data on injuriousness:
+```{r}
+#| echo: false
+#| label: fig-distribution-outcome
+#| fig-cap: Distribution of `injurious`, visualized
+load(here("plots/distribution_outcome1.rda"))
+distribution_outcome1
+```
+```{r}
+#| echo: false
+#| label: tbl-distribution-outcome
+#| tbl-cap: Distribution of `injurious`, summarized
+load(here("plots/distribution_outcome2.rda"))
+distribution_outcome2 |>
+  kable()
+```
+@fig-distribution-outcome and @tbl-distribution-outcome reveal a large amount of class imbalance in `injurious`: non-injurious collisions significantly outnumber injurious collisions, with the ratio between the two classes exceeding 6:1. This warrants **2 additional steps** that will be taken — dataset downsizing and stratified random sampling — which will be described in further detail in the next section.
+
+Notably, the following section will explore in further detail my steps of  preprocessing, data splitting, model building/tuning, and recipe engineering.
+
+## Methods
+Prior to spending my dataset, I first run it through **2 prerequisite steps**: *downsampling* and *downsizing*. The sheer size of my dataset in its raw form (with 800,000+ rows) is unsustainable given my computational and temporal constraints; additionally, the class imbalance existing within my binomial outcome variable, `injurious`, warrants adjustments. I address both of these concerns in tandem through these 2 steps:\
+
+1. **Downsampling**: After throwing out missing data (~0.22% of rows), I use `slice_sample()` to downsample my dataset with respect to the underrepresented class in `injurious`, "Yes". This reduces the number of observations from over 800,000 to about 220,000^[The number of observations in the underrepresented outcome variable class — collisions that *are* injurious — is about 110,000 in the raw dataset] and at the same time ensures a 1:1 class balance in my dummy outcome variable.\
+2. **Additional downsizing**: A 220,000-row dataset still exceeds my computational limits; as such, I further downsize my sample via random selection using `initial_split()`. The result is a ~44,000-row final dataset, exactly 20% as large as post-downsampling dataset and roughly 5-6% as large as the original dataset. 
+
+Next, I use an 80:20 proportion combined with stratified random sampling (with respect to `injurious`) in order to split this final dataset into **training** and **testing** sets. Within the training set of roughly 35,000 rows, I then use **V-fold cross-validation** to generate resampled data on which I later conduct my ensuing model competition process. Specifically, my resampling process entails randomly partioning my training set into 5 subsets (`v` = 5) repeated 3 times (`repeats` = 3), generating **15 resamples/folds** — each of which contains roughly 7,000 observations^[Within each 7,000-row fold, 80% of rows are allocated to training and the remaining 20% are allocated to testing since `v` = 5] — on which my various models are trained and evaluated.
+
+I define and, using a regular grid, tune the **7 following models**^[To accomodate the binomial nature of `injurious`, all 7 models use `mode` = "classification"] — the first 2 being *baseline* models — for use in my model competition:
+
+1. **Null**: A simple baseline null model defined using `null_model()` with the `parsnip` engine.\
+2. **Naive Bayes**: A simple "step-up" baseline model defined using `naive_Bayes()` with the `klaR` engine.\
+3. **Logistic regression**: A *parametric* non-regularized regression model defined using `logistic_reg()` with the `glm` engine.\
+4. **Elastic net**: A *parametric* regularized regression model defined using `logistic_reg()` with the `glmnet` engine and the following tuning parameters:\
+  • Mixture explored over [0, 1] with 10 levels\
+  • Penalty explored over [-3, 0] with 10 levels\
+5. **K-nearest-neighbors**: A *non-parametric* algorithm defined using `nearest_neighbor()` with the `kknn` engine and the following tuning parameter:\
+  • Neighbors explored over [1, 15] with 5 levels\
+6. **Random forest**: A *non-parametric*, independently-trained algorithm defined using `rand_forest()` with the `ranger` engine, 500 `trees`, and the following tuning parameters:\
+  • Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
+  • Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
+7. **Boosted tree**: A *non-parametric*, sequentially-trained algorithm defined using `boost_tree()` with the `xgboost` engine, 500 trees, and the following tuning parameters:\
+   • Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
+  • Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
+  • Learning rate explored over [-5, -0.2] on log-10 scale with 4 levels
+  
+  
+Finally, I select the **following 11 variables** (4 integer, 7 factor) to use as predictors in my parametric and non-parametric feature-engineered recipe formulas: `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month`. These predictor are individually selected on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to the **Appendix: EDA** of this report for predictors' definitions, as well as my univariate/bivariate/multivariate analyses of them in relation to my prediction problem at-hand]. 
+
+## Model Building & Selection Results
+
+## Final Model Analysis
+
+## Conclusion
+
+## References
+
+*How many licensed drivers are there in the US?* (2018). Hedges & Company. [https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:\~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license](https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license).
+
+Yellman, M. A. & Sauber-Schatz, E. K. (2022). Motor Vehicle Crash Deaths --- United States and 28 Other High-Income Countries, 2015 and 2019. *Morbidity and Mortality Weekly Report (MMWR)*, 71(26), 837-843. <https://www.cdc.gov/mmwr/volumes/71/wr/mm7126a1.htm?s_cid=mm7126a1_w#suggestedcitation>
+
+## Appendix: EDA

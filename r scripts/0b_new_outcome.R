@@ -48,19 +48,36 @@ save(
 
 # new outcome variable analysis: missingness and distribution
 ### missingness
-traffic_data_updated |>
+missing_injurious <- traffic_data_updated |>
   select(injurious) |>
   naniar::miss_var_summary() |>
   knitr::kable()
+save(
+  missing_injurious,
+  file = here("plots/missing_outcome.rda")
+)
 ### distribution (visual)
-traffic_data_updated |>
+distribution_outcome1 <- traffic_data_updated |>
+  filter(!is.na(injurious)) |>
   ggplot(aes(injurious)) +
-  geom_bar(fill = "steelblue") +
-  theme_minimal()
+  geom_bar(fill = "skyblue") +
+  theme_minimal() +
+  labs(
+    title = "Distribution of traffic collisions by injuriousness",
+    subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
+  )
+save(
+  distribution_outcome1,
+  file = here("plots/distribution_outcome1.rda")
+)
 ### distribution (table)
-traffic_data_updated |>
-  count(injurious) |>
-  knitr::kable()
+distribution_outcome2 <- traffic_data_updated |>
+  filter(!is.na(injurious)) |>
+  count(injurious) 
+save(
+  distribution_outcome2,
+  file = here("plots/distribution_outcome2.rda")
+)
 
 
 

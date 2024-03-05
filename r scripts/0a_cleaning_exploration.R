@@ -107,12 +107,19 @@ save(
 # missingness exploration — whole dataset
 load(here("data/traffic_data_cleaned.rda"))
 missing_table <- naniar::miss_var_summary(traffic_data_cleaned) 
-DT::datatable(missing_table)
+save(
+  missing_table,
+  file = here("plots/missing_table.rda")
+)
 missing_names <- missing_table |>
   pull(variable)
-traffic_data_cleaned |>
+missing_visual <- traffic_data_cleaned |>
   select(missing_names) |>
   gg_miss_var()
+save(
+  missing_visual,
+  file = here("plots/missing_visual.rda")
+)
 
 # outcome variable exploration — distribution + missingness
 traffic_data_cleaned |>
