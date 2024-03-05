@@ -42,3 +42,4 @@
 data/Traffic_Crashes_-_Crashes_20240203.csv
 data/traffic_data_updated.rda
 data/traffic_data_cleaned.rda
+plots/distribution_outcome1.rda
