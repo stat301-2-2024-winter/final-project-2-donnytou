@@ -119,20 +119,30 @@ I define and, using a regular grid, tune the **7 following models**^[To accomoda
 2. **Naive Bayes**: A simple "step-up" baseline model defined using `naive_Bayes()` with the `klaR` engine.\
 3. **Logistic regression**: A *parametric* non-regularized regression model defined using `logistic_reg()` with the `glm` engine.\
 4. **Elastic net**: A *parametric* regularized regression model defined using `logistic_reg()` with the `glmnet` engine and the following tuning parameters:\
-  • Mixture explored over [0, 1] with 10 levels\
-  • Penalty explored over [-3, 0] with 10 levels\
+    a) Mixture explored over [0, 1] with 10 levels\
+    b) Penalty explored over [-3, 0] with 10 levels\
 5. **K-nearest-neighbors**: A *non-parametric* algorithm defined using `nearest_neighbor()` with the `kknn` engine and the following tuning parameter:\
-  • Neighbors explored over [1, 15] with 5 levels\
+    a) Neighbors explored over [1, 15] with 5 levels\
 6. **Random forest**: A *non-parametric*, independently-trained algorithm defined using `rand_forest()` with the `ranger` engine, 500 `trees`, and the following tuning parameters:\
-  • Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
-  • Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
+    a) Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
+    b) Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
 7. **Boosted tree**: A *non-parametric*, sequentially-trained algorithm defined using `boost_tree()` with the `xgboost` engine, 500 trees, and the following tuning parameters:\
-   • Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
-  • Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
-  • Learning rate explored over [-5, -0.2] on log-10 scale with 4 levels
+    a) Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
+    b) Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
+    c) Learning rate explored over [-5, -0.2] on log-10 scale with 4 levels
   
-  
-Finally, I select the **following 11 variables** (4 integer, 7 factor) to use as predictors in my parametric and non-parametric feature-engineered recipe formulas: `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month`. These predictor are individually selected on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to the **Appendix: EDA** of this report for predictors' definitions, as well as my univariate/bivariate/multivariate analyses of them in relation to my prediction problem at-hand]. 
+Next, the recipes I embed across these 7 models are constructed along **2 independent dimensions**:\
+
+1. **"Kitchen sink" .vs. "refined"**: These two recipe categories differ primarily on the basis of feature selection: my *kitchen sink* recipe uses as many predictors as possible, while my *refined* recipe is more selective with the predictors used...\
+    a) The kitchen sink feature selection *filters out* 26 "unacceptable" predictors which are variables that:
+        i) See missingness rates in excess of 90% (e.g. `workers_present_i`);
+        ii) Are too closely correlated with `injurious` (e.g. `injuries_total`); 
+        iii) Contain too many factor levels, often because they serve as identifiers (e.g. `crash_record_id`)
+    b) The refined feature selection *actively selects* 11 predictors — `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month` — on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to the **Appendix: EDA** of this report for predictors' definitions, as well as my univariate/bivariate/multivariate analyses of them in relation to my prediction problem at-hand]
+2. **Parametric .vs. non-parametric**: Recipes that are compatible with my *3 parametric models* (null, logistic regression, and elastic net) differ from recipes meant for my *3 non-parametric models* (nearest neighbors, random forest, and boosted tree) in 2 ways...\
+    a) Unlike their parametric counterparts, my non-parametric recipes use *one-hot encoding* when converting factor variables into numeric terms
+    b) Unlike their non-parametric counterparts, my parametric recipes incorporate *interaction terms* between 5 predictors^[This comparison only applies for the *refined* parametric/non-parametric recipes; the *kitchen sink* recipe is intentionally kept simple by omitting interaction terms]: `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment`\
+    
 
 ## Model Building & Selection Results
 
