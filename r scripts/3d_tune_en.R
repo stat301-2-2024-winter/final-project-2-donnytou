@@ -7,7 +7,7 @@ library(here)
 tidymodels_prefer()
 
 # load data and recipe
-load(here("data/traffic_fold.rda"))
+load(here("data_splits/traffic_fold.rda"))
 load(here("recipes/recipe1_parametric.rda"))
 load(here("recipes/recipe2_parametric.rda"))
 

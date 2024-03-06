@@ -8,7 +8,7 @@ library(discrim)
 tidymodels_prefer()
 
 # load data and recipe
-load(here("data/traffic_fold.rda"))
+load(here("data_splits/traffic_fold.rda"))
 load(here("recipes/recipe_naive.rda"))
 
 # model specification

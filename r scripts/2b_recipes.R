@@ -7,7 +7,7 @@ library(here)
 tidymodels_prefer()
 
 # load data
-load(here("data/traffic_train.rda"))
+load(here("data_splits/traffic_train.rda"))
 
 # background job for mac
 library(doMC)

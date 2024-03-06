@@ -70,11 +70,12 @@ missing_visual
 @tbl-miss-var reinforces @fig-miss-var by showing that 11/50 variables in the data see a missingness rate of over 65%, with the top 8 seeing missing values for over 90% of the entire dataset — a magnitude of missingness that is certainly concerning, especially since it limits my flexibility for feature engineering/selection. Fortunately, the rate of missingness drops precipitously for the remaining 39 variables, which see either zero or close-to-zero missingness. 
 
 To construct my **outcome variable of interest**, I condition it using `if_else()` on one of the preexisting variables, `injuries_total`, which is an integer measurement of the *number* of individuals sustaining fatal, incapacitating, non-incapacitating, or possible injuries within a given traffic collision. The resulting binary outcome variable — `injurious` — is appended to the dataset as a new column and is coded as:\
+
 • `Yes` if `injuries_total` exceeds zero;\
 • `No` if `injuries_total` equals zero; and\
 • `NA` if `injuries_total` is a missing value\
 
-I have chosen to take the "classification route" with the new `injurious` variable — as opposed to the "regression route" with existing `injuries_total` variable — so as to preserve the injury-focused nature of my initial question whilst, at the same time, streamline the data downsizing/balancing process (which will be described in the following section).
+I have chosen to take the "classification route" with the new `injurious` variable — as opposed to the "regression route" with existing `injuries_total` variable — so as to preserve the injury-focused nature of my initial question whilst, at the same time, streamline the ensuing data downsizing/balancing process^[Described in the following section].
 
 The following exhibits will explore the missingness and distribution of my `injurious` outcome variable using the original data.
 
@@ -112,7 +113,7 @@ Prior to spending my dataset, I first run it through **2 prerequisite steps**: *
 1. **Downsampling**: After throwing out missing data (~0.22% of rows), I use `slice_sample()` to randomly downsample my dataset with respect to the underrepresented class in `injurious`, "Yes". This reduces the number of observations from over 800,000 to about 220,000^[The number of observations in the underrepresented outcome variable class — collisions that *are* injurious — is about 110,000 in the raw dataset] and at the same time ensures a 1:1 class balance in my dummy outcome variable.\
 2. **Additional downsizing**: A 220,000-row dataset still exceeds my computational limits; as such, I further downsize my sample via random selection using `initial_split()`. The result is a ~44,000-row final dataset, exactly 20% as large as post-downsampling dataset and roughly 5-6% as large as the original dataset. 
 
-### Data Splitting
+### Data Splitting/Resampling
 
 Next, I use an *80:20 proportion* combined with *stratified random sampling* (with respect to `injurious`) in `initial_split()` in order to split this final dataset into **training** and **testing** sets. Within the training set of roughly 35,000 rows, I then use **V-fold cross-validation** to generate resampled data on which I later conduct my model competition process. Specifically, my resampling process entails randomly partioning my training set into 5 subsets (`v` = 5) repeated 3 times (`repeats` = 3), generating **15 resamples/folds** — each of which contains roughly 7,000 observations^[Within each 7,000-row fold, 80% of rows are allocated to training and the remaining 20% are allocated to testing since `v` = 5] — on which my various models are trained and evaluated.
 
@@ -211,8 +212,8 @@ combined_accuracy |>
 
 There are **3 general takeaways** from @tbl-fit-resamples1 and @tbl-fit-resamples2:\
 
-1. The **top-performing individual model** per the `accuracy` metric is the *boosted tree model fit using the kitchen sink recipe*;\
-2. Across all complex model types, the **kitchen sink recipe strictly dominates the feature engineered recipe** when it comes to predictive accuracy;\
+1. The **top-performing individual model** per the `accuracy` metric is the *boosted tree model fit using the kitchen sink recipe*\
+2. Across all complex model types, the **kitchen sink recipe strictly dominates the feature engineered recipe** when it comes to predictive accuracy\
     a) This suggests that, in my case, feature engineering is **not worth it**: it adds additional effort and yields worse results\
     b) This **does not** necessarily suggest, however, that a kitchen sink strategy for feature selection is in general strictly superior to a more selective one\
         i) In my case, it is likely that I may have simply omitted key variables that I *should* have included in the construction of my feature engineered recipe
@@ -303,7 +304,7 @@ Perhaps one of the most important queries to investigate in the context of model
 The final component of my predictive modelling process entails fitting my best-performing model workflow — `boosted1` — to my testing set of roughly 9,000 observations. Prior to this, I take **2 prerequisite steps**:\
 
 1. I extract the underlying feature engineering specifications (i.e. the non-parametric kitchen sink recipe) as well as the optimal tuning hyperparameters (i.e. `mtry` = 5, `min_n` = 2, and `learn_rate` = -0.2 log-scaled) of my winning model, `boosted1`\
-2. I then train the model workflow on my whole ~35,000-row training dataset and save the result as a fitted model object
+2. I then train the extracted model workflow on my whole ~35,000-row training dataset and save the result as a fitted model object
 
 Finally, I apply the resulting fitted model to my testing set of ~9,000 rows — all in order to see how this winning model performs on **never-before-seen-data**. The following exhibits display my results.
 
@@ -353,8 +354,8 @@ Still, this model is **far from perfect**; analyses from previous reports identi
 2. The "objectively optimal" hyperparameter values for `min_n`, `mtry`, and `learn_rate` are still not exactly known\
     a) This analysis merely identified the best-performing tuning set among 64 possible boosted-tree-model combinations, but more combinations exist and should be explored if computational constraints allow for it\
 3. Although `boosted1` is the top performer among candidates in @tbl-fit-resamples2, the differences across the upper 50% of candidates are marginal at-best\
-    a) If this model is "any good", then it is likely that the runner-ups are as well to very similar degrees
-
+    a) If this model is "any good", then it's possible that the runner-up models are as well
+    
 ## Conclusion
 
 ## References
@@ -367,7 +368,16 @@ Yellman, M. A. & Sauber-Schatz, E. K. (2022). Motor Vehicle Crash Deaths --- Uni
 
 In this section, I detail the **bivariate** and **multivariate** EDA exhibits used to justify my *predictor* and *interaction term* selections for use in my feature engineered recipe. I also detail the **univariate** explorations conducted on factor-based features to explore potential class imbalances. 
 
-Recall that the feature selection/engineering steps *unique to this recipe* consist of the following components:
+
+::: {.callout-important collapse="true" icon="false"}
+
+### Data Used To Conduct This EDA
+
+The following EDAs are **NOT** conducted on the entire 800,000-row raw dataset; doing so would involve the 9,000 rows I use to assess my final model. Instead, I use **throwaway data**, which is the roughly 80% * 220,000 = **176,000** rows of data I "throw out" between my *downsizing* and *downsampling* stages. By doing this, I ensure no contamination of my assessment data during the exploratory stages of this project.
+
+:::
+
+Recall that the feature selection/engineering steps unique to `recipe1_parametric` and `recipe1_tree` consist of the following components:
 
 1. **11 predictors/"features"** ^[refer to `README.md` within the `data/` subdirectory for variable definitions]: `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month`\
 2. **4 interaction terms** created using 5 features — `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment` — and defined as the following...\
@@ -380,9 +390,711 @@ The following **3 subsections** are dedicated to bivariate, multivariate, and un
 
 ### Bivariate EDA: Feature Selection
 
+#### 1. Street Alignment
+
+`alignment`: "Street alignment at crash location, as determined by reporting officer."
+
+```{r}
+#| echo: false
+#| label: fig-alignment
+#| fig-cap: Bivariate Analysis — Alignment and Injuriousness
+load(here("data_splits/traffic_data_throwaway.rda"))
+traffic_data_throwaway |>
+  ggplot(aes(x = alignment, fill = injurious)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Street Alignment",
+    x = "Alignment",
+    y = ""
+  )
+traffic_data_throwaway |>
+  mutate(
+    alignment = fct_collapse(
+      alignment,
+      "CURVE" = c(
+        "CURVE ON GRADE",
+        "CURVE ON HILLCREST",
+        "CURVE, LEVEL"
+      ),
+      "STRAIGHT" = c(
+        "STRAIGHT AND LEVEL",
+        "STRAIGHT ON GRADE",
+        "STRAIGHT ON HILLCREST"
+      )
+    )
+  ) |>
+  ggplot(aes(x = alignment, fill = injurious)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Street Alignment, Factor Levels Condensed",
+    x = "Alignment",
+    y = ""
+  )
+```
+
+A higher proportion of collisions occurring on streets with *curved* alignments are injurious.
+
+#### 2. Posted Speed Limit
+
+`posted_speed_limit`: "Posted speed limit, as determined by reporting officer."
+
+```{r}
+#| echo: false
+#| label: fig-speed-limit
+#| fig-cap: Bivariate Analysis — Speed Limit and Injuriousness
+traffic_data_throwaway |>
+  ggplot(aes(x = posted_speed_limit)) +
+  geom_freqpoly() +
+  facet_wrap(vars(injurious)) +
+  labs(
+    title = "Posted Speed Limit by Injury Status",
+    x = "Posted speed limit",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+```{r}
+#| echo: false
+#| label: tbl-speed-limit
+#| tbl-cap: Bivariate Analysis — Speed Limit and Injuriousness
+traffic_data_throwaway |>
+  summarize(
+    "Mean speed limit" = mean(posted_speed_limit),
+    .by = injurious
+  ) |>
+  knitr::kable() 
+```
+
+On average, injurious collisions occur on roadways with slightly-higher posted speed limits.
+
+#### 3. Lane Count
+
+`lane_cnt`: "Total number of through lanes in either direction, excluding turn lanes, as determined by reporting officer (0 = intersection)."
+
+```{r}
+#| echo: false
+#| label: tbl-lane-count
+#| tbl-cap: Bivariate Analysis — Lane Count and Injuriousness
+traffic_data_throwaway |>
+  summarize(
+    "Mean lane count" = mean(lane_cnt, na.rm = TRUE),
+    .by = injurious
+  ) |>
+  knitr::kable() 
+```
+
+On average, injurious collisions occur on roadways with slightly more lanes.
+
+
+#### 4. Intersection-Relatedness
+
+`intersection_related_i`: "A field observation by the police officer whether an intersection played a role in the crash. Does not represent whether or not the crash occurred within the intersection."
+
+```{r}
+#| echo: false
+#| label: fig-intersection-related1
+#| fig-cap: Bivariate Analysis — Intersection Relatedness and Injuriousness (1)
+traffic_data_throwaway |>
+  filter(!is.na(intersection_related_i)) |>
+  ggplot(aes(x = intersection_related_i)) +
+  geom_bar(fill = "mediumpurple1") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Intersection Relatedness",
+    x = "Intersection-related?",
+    y = "Count"
+  )
+```
+
+```{r}
+#| echo: false
+#| label: fig-intersection-related2
+#| fig-cap: Bivariate Analysis — Intersection Relatedness and Injuriousness (2)
+traffic_data_throwaway |>
+  filter(!is.na(intersection_related_i)) |>
+  ggplot(aes(x = intersection_related_i, fill = injurious)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Intersection Relatedness",
+    x = "Intersection-related?",
+    y = ""
+  )
+```
+A higher proportion of collisions reported to be intersection-related are injurious.
+
+#### 5. Trafficway Type
+
+`trafficway_type`: "Trafficway type, as determined by reporting officer."
+
+```{r}
+#| echo: false
+#| label: fig-trafficway-type
+#| fig-cap: Bivariate Analysis — Trafficway Type and Injury Status
+traffic_data_throwaway |>
+  ggplot(aes(x = trafficway_type, fill = injurious)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Trafficway Type",
+    x = "Trafficway type",
+    y = ""
+  )
+```
+Collisions occurring in four-ways tend to be the most injurious; collisions occuring in parking lots tend to be the least injurious.
+
+
+#### 6. First Crash Type
+
+`first_crash_type`: "Type of first collision in crash."
+
+```{r}
+#| echo: false
+#| label: fig-first-crash-type
+#| fig-cap: Bivariate Analysis — First Crash Type and Injuriousness
+traffic_data_throwaway |>
+  ggplot(aes(x = first_crash_type)) +
+  geom_bar(fill = "palegreen") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by First Crash Type",
+    x = "First Crash Type",
+    y = "Count"
+  )
+```
+Injurious collisions are more likely to involve non-motorists.
+
+#### 7. Collision Report Type
+
+`report_type`: "Administrative report type (at scene, at desk, amended)."
+
+```{r}
+#| echo: false
+#| label: fig-report-type
+#| fig-cap: Bivariate Analysis — Administrative Report Type and Injuriousness
+traffic_data_throwaway |>
+  filter(!is.na(report_type)) |>
+  ggplot(aes(x = report_type)) +
+  geom_bar(fill = "cyan2") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Report Type",
+    x = "Report Type",
+    y = "Count"
+  )
+```
+Injurious collisions are more likely to be reported on-scene; non-injurious collisions are more likely to be reported at-desk.
+
+#### 8. Number of Units Involved
+
+`num_units`: "Number of units involved in the crash. A unit can be a motor vehicle, a pedestrian, a bicyclist, or another non-passenger roadway user. Each unit represents a mode of traffic with an independent trajectory."
+
+```{r}
+#| echo: false
+#| label: fig-num-units
+#| fig-cap: Bivariate Analysis — Collision Scope and Injuriousness
+traffic_data_throwaway |>
+  ggplot(aes(x = num_units)) +
+  geom_freqpoly() +
+  facet_wrap(vars(injurious)) +
+  labs(
+    title = "Number of Units Involved by Injury Status",
+    x = "Number of units involved",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+```{r}
+#| echo: false
+#| label: tbl-num-units
+#| tbl-cap: Bivariate Analysis — Collision Scope and Injuriousness
+traffic_data_throwaway |>
+  summarize(
+    "Mean number of units involved" = mean(num_units),
+    .by = injurious
+  ) |>
+  knitr::kable()
+```
+
+On average, injurious collisions tend to involved slightly more units.
+
+#### 9. Traffic Device Condition
+
+`device_condition`: "Condition of traffic control device, as determined by reporting officer."
+
+```{r}
+#| echo: false
+#| label: fig-device-condition
+#| fig-cap: Bivariate Analysis — Traffic Device Condition and Injuriousness
+traffic_data_throwaway |>
+  filter(
+    device_condition == "Bad" | device_condition == "Good"
+  ) |>
+  ggplot(aes(x = device_condition)) +
+  geom_bar(fill = "gold") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Traffic Device Condition",
+    x = "Traffic control device condition",
+    y = "Count"
+  )
+```
+Strangely, injurious collisions are less likely to occur near *poorly functioning* traffic control devices. I would expect the opposite to be true.
+
+#### 10. Month of Collision
+
+`month`: "The month component of [the collision's date of occurrence]."
+
+```{r}
+#| echo: false
+#| label: fig-month
+#| fig-cap: Bivariate Analysis — Month Of Collision and Injuriousness
+traffic_data_throwaway |>
+  ggplot(aes(month)) +
+  geom_histogram(fill = "navyblue") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  scale_x_continuous(breaks = 1:12)
+```
+```{r}
+#| echo: false
+#| label: tbl-month
+#| tbl-cap: Bivariate Analysis — Month Of Collision and Injuriousness
+traffic_data_throwaway |>
+  summarize(
+    "Average collision month" = mean(month),
+    .by = injurious
+  ) |>
+  knitr::kable()
+```
+Injurious collisions tend to occur slightly later in a given year.
+
+#### 11. Lighting Conditions
+
+`lighting_condition`: "Light condition at time of crash, as determined by reporting officer."
+
+```{r}
+#| echo: false
+#| label: fig-lighting-condition1
+#| fig-cap: Bivariate Analysis — Lighting Condition and Injuriousness
+traffic_data_throwaway |>
+  filter(
+    !(lighting_condition == "UNKNOWN")
+  ) |>
+  ggplot(aes(x = lighting_condition)) +
+  geom_bar(fill = "forestgreen") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Lighting Condition",
+    x = "Lighting condition",
+    y = "Count"
+  )
+```
+```{r}
+#| echo: false
+#| label: fig-lighting-condition2
+#| fig-cap: Bivariate Analysis — Lighting Condition and Injuriousness, factor levels collapsed
+traffic_data_throwaway |>
+  filter(
+    !(lighting_condition == "UNKNOWN")
+  ) |>
+  mutate(
+    lighting_condition = fct_collapse(
+      lighting_condition,
+      "DAYLIGHT" = "DAYLIGHT",
+      "NON-DAYLIGHT" = c("DARKNESS", "DARKNESS, LIGHTED ROAD", "DAWN", "DUSK")
+    )
+  ) |>
+  ggplot(aes(x = lighting_condition)) +
+  geom_bar(fill = "forestgreen") +
+  facet_wrap(vars(injurious)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    title = "Injury Status by Lighting Condition, Factor Levels Condensed",
+    x = "Lighting condition",
+    y = "Count"
+  )
+```
+Relative to their non-injurious counterparts, injurious collisions are slightly more likely to occur under non-daylight lighting conditions.
+
 ### Multivariate EDA: Interaction Term Selection
 
-### Univariate EDA: Class Imbalances
-    
+Here, I will display the exploratory analyses conducted to discover and justify my 4 interaction terms.
+
+#### 1) `num_units` * `lighting_condition`
+
+*Does the effect of collision scope on injuriousness potentially depend on external lighting conditions?*
+
+```{r}
+#| echo: false
+#| label: fig-interact1
+#| fig-cap: Injuriousness .vs. Collision Scope by Lighting Condition (Factor Levels Condensed)
+traffic_data_throwaway |>
+  filter(!(lighting_condition == "UNKNOWN")) |>
+  mutate(
+    lighting_condition = fct_collapse(
+      lighting_condition,
+      "DAYLIGHT" = "DAYLIGHT",
+      "NON-DAYLIGHT" = c(
+        "DARKNESS",
+        "DARKNESS, LIGHTED ROAD",
+        "DAWN",
+        "DUSK"
+      )
+    )
+  ) |>
+  ggplot(aes(num_units, fill = injurious)) +
+  geom_bar(position = "fill") +
+  facet_wrap(vars(lighting_condition)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Number of units involved",
+    y = "Count",
+    title = "Injury Status by Number of Units and Lighting Condition (Factor Collapsed)"
+  ) +
+  theme_minimal()
+```
+The positive association between incident scope (`num_units`) and injury status (`injurious`) appears to be much stronger for collisions occurring under daylight.
+
+#### 2) `num_units` * `trafficway_type`
+
+*Does the effect of collision scope on injuriousness potentially depend on external trafficway conditions?*
+
+```{r}
+#| echo: false
+#| label: fig-interact2
+#| fig-cap: Injuriousness .vs. Collision Scope by Trafficway Type (Factor Levels Condensed)
+traffic_data_throwaway |>
+  filter(!(trafficway_type == "Other")) |>
+  mutate(
+    trafficway_type = fct_collapse(
+      trafficway_type,
+      "DIVIDED" = c(
+        "DIVIDED - W/MEDIAN (NOT RAISED)",
+        "DIVIDED - W/MEDIAN BARRIER"
+        )
+      )
+  ) |>
+  ggplot(aes(num_units, fill = injurious)) +
+  geom_bar(position = "fill") +
+  facet_wrap(vars(trafficway_type)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Number of units involved",
+    y = "Count",
+    title = "Injury Status by Number of Units and Trafficway Type (Factor Collapsed)"
+  ) +
+  theme_minimal()
+```
+A distinct linear relationship between collision scope (`num_units`) and injury status (`injurious`) applies only to collisions for whom `trafficway_type` = "FOUR WAY"; for the other trafficway categories, the relationship is "U-shaped" and/or unclear.
+
+#### 3) `alignment` * `lighting_condition`
+
+*Does the effect of street alignment on injuriousness potentially depend on external lighting conditions?*
+
+```{r}
+#| echo: false
+#| label: fig-interact3
+#| fig-cap: Injuriousness .vs. Street Alignment by Lighting Condition, Factor Levels Condensed
+traffic_data_throwaway |>
+  filter(!(lighting_condition == "UNKNOWN")) |>
+  mutate(
+    alignment = fct_collapse(
+      alignment,
+      "CURVE" = c(
+        "CURVE ON GRADE",
+        "CURVE ON HILLCREST",
+        "CURVE, LEVEL"
+      ),
+      "STRAIGHT" = c(
+        "STRAIGHT AND LEVEL",
+        "STRAIGHT ON GRADE",
+        "STRAIGHT ON HILLCREST"
+      )
+    ),
+    lighting_condition = fct_collapse(
+      lighting_condition,
+      "DAYLIGHT" = "DAYLIGHT",
+      "NON-DAYLIGHT" = c(
+        "DARKNESS",
+        "DARKNESS, LIGHTED ROAD",
+        "DAWN",
+        "DUSK"
+      )
+    ) 
+  ) |>
+  ggplot(aes(x = alignment, fill = injurious)) +
+  geom_bar(position = "fill") +
+  facet_wrap(vars(lighting_condition)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Alignment",
+    y = "Count",
+    title = "Injury Status by Street Alignment and Lighting Condition (Factor Collapsed)"
+  ) +
+  theme_minimal()
+```
+The extent to which curved streets (`alignment` = "CURVE) contribute to higher injuriousness (`injurious` = YES) depends *slightly* on external lighting conditions.
+
+#### 4) `alignment` * `intersection_related_i`
+
+*Does the effect of street alignment on injuriousness potentially depend on whether the given collision is in an intersection?*
+
+```{r}
+#| echo: false
+#| label: fig-interact4
+#| fig-cap: Injuriousness .vs. Street Alignment by Intersection Relatedness, Factor Levels Condensed
+traffic_data_throwaway |>
+  filter(!is.na(intersection_related_i)) |>
+  filter(!(lighting_condition == "UNKNOWN")) |>
+  mutate(
+    alignment = fct_collapse(
+      alignment,
+      "CURVE" = c(
+        "CURVE ON GRADE",
+        "CURVE ON HILLCREST",
+        "CURVE, LEVEL"
+      ),
+      "STRAIGHT" = c(
+        "STRAIGHT AND LEVEL",
+        "STRAIGHT ON GRADE",
+        "STRAIGHT ON HILLCREST"
+      )
+    )
+  ) |>
+  ggplot(aes(x = alignment, fill = injurious)) +
+  geom_bar(position = "fill") +
+  facet_wrap(vars(intersection_related_i)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Alignment",
+    y = "Count",
+    title = "Injury Status by Street Alignment (Factor Collapsed) and Intersection Relatedness"
+  ) +
+  theme_minimal()
+```
+Relative to those occurring on straight roads, collisions occurring on curved roads (`alignment` = "CURVE") are more injurious (`injurious` = "YES") *only when* they are not intersection-related.
+
+### Univariate EDA: Predictor Class Imbalances
+
+#### 1. Street Alignment
+```{r}
+#| echo: false
+#| label: fig-imbalance1
+#| fig-cap: Class Imbalance — Street Alignment
+traffic_data_throwaway |>
+  ggplot(aes(alignment)) +
+  geom_bar(fill = "cornflowerblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Alignment",
+    y = "Count",
+    title = "Distribution of Collisions by Street Alignment"
+  ) +
+  theme_minimal()
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance1
+#| tbl-cap: Street Alignment, Counted
+traffic_data_throwaway |>
+  count(alignment) |>
+  knitr::kable()
+```
+
+#### 2. Intersection Relatedness
+```{r}
+#| echo: false
+#| label: fig-imbalance2
+#| fig-cap: Class Imbalance — Intersection Relatedness
+traffic_data_throwaway |>
+  ggplot(aes(intersection_related_i)) +
+  geom_bar(fill = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Intersection related?",
+    y = "Count",
+    title = "Distribution of Collisions by Intersection Relatedness"
+  ) +
+  theme_minimal()
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance2
+#| tbl-cap: Intersection Relatedness, Counted
+traffic_data_throwaway |>
+  count(intersection_related_i) |>
+  knitr::kable()
+```
+
+#### 3. Trafficway Type
+```{r}
+#| echo: false
+#| label: fig-imbalance3
+#| fig-cap: Class Imbalance — Trafficway Type
+traffic_data_throwaway |>
+  ggplot(aes(trafficway_type)) +
+  geom_bar(fill = "darkorange1") +
+  labs(
+    x = "Trafficway type",
+    y = "Count",
+    title = "Distribution of Collisions by Trafficway Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance3
+#| tbl-cap: Trafficway Type, Counted
+traffic_data_throwaway |>
+  count(trafficway_type) |>
+  knitr::kable()
+```
+
+#### 4. First Crash Type
+```{r}
+#| echo: false
+#| label: fig-imbalance4
+#| fig-cap: Class Imbalance — First Crash Type
+traffic_data_throwaway |>
+  ggplot(aes(first_crash_type)) +
+  geom_bar(fill = "plum1") +
+  labs(
+    x = "First crash type",
+    y = "Count",
+    title = "Distribution of Collisions by First Crash Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance4
+#| tbl-cap: First Crash Type, Counted
+traffic_data_throwaway |>
+  count(first_crash_type) |>
+  knitr::kable()
+```
+
+#### 5. Collision Report Type
+```{r}
+#| echo: false
+#| label: fig-imbalance5
+#| fig-cap: Class Imbalance — Administrative Report Type
+traffic_data_throwaway |>
+  ggplot(aes(report_type)) +
+  geom_bar(fill = "lightcoral") +
+  labs(
+    x = "Report type",
+    y = "Count",
+    title = "Distribution of Collisions by Report Type"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance5
+#| tbl-cap: First Crash Type, Counted
+traffic_data_throwaway |>
+  count(report_type) |>
+  knitr::kable()
+```
+
+#### 6. Traffic Device Condition
+
+```{r}
+#| echo: false
+#| label: fig-imbalance6
+#| fig-cap: Class Imbalance — Traffic Control Device Condition
+traffic_data_throwaway |>
+  ggplot(aes(device_condition)) +
+  geom_bar(fill = "maroon") +
+  labs(
+    x = "Traffic control device condition",
+    y = "Count",
+    title = "Distribution of Collisions by Traffic Device Condition"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance6
+#| tbl-cap: Traffic Control Device Condition, Counted
+traffic_data_throwaway |>
+  count(device_condition) |>
+  knitr::kable()
+```
+
+#### 7. Lighting Condition
+
+```{r}
+#| echo: false
+#| label: fig-imbalance7
+#| fig-cap: Class Imbalance — Lighting Condition
+traffic_data_throwaway |>
+  ggplot(aes(lighting_condition)) +
+  geom_bar(fill = "aquamarine3") +
+  labs(
+    x = "Lighting condition",
+    y = "Count",
+    title = "Distribution of Collisions by Lighting Condition"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance7
+#| tbl-cap: Lighting Condition, Counted
+traffic_data_throwaway |>
+  count(lighting_condition) |>
+  knitr::kable()
+```
+
+#### 8. Month of Collision
+```{r}
+#| echo: false
+#| label: fig-imbalance8
+#| fig-cap: Class Imbalance — Month of Collision
+traffic_data_throwaway |>
+  ggplot(aes(month)) +
+  geom_bar(fill = "midnightblue") +
+  labs(
+    x = "Month",
+    y = "Count",
+    title = "Distribution of Collisions by Incident Month"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_continuous(breaks = 1:12)
+```
+```{r}
+#| echo: false
+#| label: tbl-imbalance8
+#| tbl-cap: Collision Month, Counted
+traffic_data_throwaway |>
+  count(month) |>
+  knitr::kable()
+```
 
 ## Appendix: Technical Info
