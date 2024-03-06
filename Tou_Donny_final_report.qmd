@@ -44,13 +44,13 @@ tidymodels_prefer()
 
 In this project, I will investigate the following predictive question: **will any of the unfortunate individuals involved in a traffic collision — both motorists and non-motorists alike — emerge injured?** This is a *classification* problem because it investigates a question of *whether* a traffic incident will be injurious instead of *how many* people are injured.
 
-I want to investigate this predictive problem in particular because of the ubiquity of driving: in fact, for most Americans, driving is the primary means by which to commute in day-to-day life. More than 80 percent of U.S. adults are licensed drivers, with over 90 percent using motor vehicles to transport themselves to-and-from work (Hedges & Company, 2018; Dews, 2013). Driving is relatively cheap and time-efficient, providing individuals with a large amount of geographic freedom and autonomy. Yet, there are **significant costs** to driving: more cars on the road often corresponds to a higher frequency of traffic collisions, many of which can result in debilitating injuries and even death. In fact, the U.S. experiences more motor-vehicle fatalities in both absolute and per-capita terms than any other high-income country (Yellman & Sauber-Schatz, 2022). In attempting to predict the "price tag" of driving (in the form of injurious collisions), I hope to minimize the heavy costs associated with an activity that has become so prevalent in, and important to, daily life.
+I want to investigate this predictive problem in particular because of the ubiquity of driving: more than 80 percent of U.S. adults are licensed drivers, with over 90 percent using motor vehicles to transport themselves to-and-from work (Hedges & Company, 2018; Dews, 2013). Driving is relatively cheap and time-efficient, providing individuals with a large amount of geographic freedom and autonomy. Yet, there are **significant costs** to driving: more cars on the road often corresponds to a higher frequency of traffic collisions, many of which can result in debilitating injuries and even death. In fact, the U.S. experiences more motor-vehicle fatalities in both absolute and per-capita terms than any other high-income country (Yellman & Sauber-Schatz, 2022). In attempting to predict the "price tag" of driving (in the form of injurious collisions), I hope to minimize the heavy costs associated with an activity that has become so prevalent in, and important to, daily life.
 
 To build my predictive modelling process, I will be analyzing collision-level crash data covering **traffic incidents occurring within City of Chicago limits and under the jurisdiction of the Chicago Police Department since 2015**^[[City of Chicago Traffic Crashes](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data)]. Approximately half of the observations are self-reported at the police district by the agent(s) involved; the other half are recorded by the responding police officer. 
 
 ## Data Overview
 
-In its raw form, my dataset on Chicago traffic collisions describes over 800,000 crashes with **50 columns** which — after basic cleaning (cleaning column names, factorizing relevant variables, collapsing factor levels) — consist of 26 factor variables, 17 integer variables, 5 string variables, and 1 logical variable. A dataset-wide missingness analysis reveals the following results:
+In its raw form, my dataset on Chicago traffic collisions describes over 800,000 crashes with **50 columns** which — after basic cleaning (cleaning column names, factorizing relevant variables, collapsing factor levels) — consist of 27 factor variables, 17 integer variables, 5 string variables, and 1 logical variable. A dataset-wide missingness analysis reveals the following results.
 
 ```{r}
 #| echo: false
@@ -67,16 +67,16 @@ missing_table |>
 load(here("plots/missing_visual.rda"))
 missing_visual
 ```
-@tbl-miss-var reinforces @fig-miss-var by showing that 11/50 variables in our data see a missingness rate of over 65%, with the top 8 seeing missing values for over 90% of the entire dataset — a magnitude of missingness that is certainly concerning, especially since it limits my flexibility for feature engineering/selection. Fortunately, the rate of missingness drops precipitously for the remaining 39 variables, which see either zero or close-to-zero missingness. 
+@tbl-miss-var reinforces @fig-miss-var by showing that 11/50 variables in the data see a missingness rate of over 65%, with the top 8 seeing missing values for over 90% of the entire dataset — a magnitude of missingness that is certainly concerning, especially since it limits my flexibility for feature engineering/selection. Fortunately, the rate of missingness drops precipitously for the remaining 39 variables, which see either zero or close-to-zero missingness. 
 
 To construct my **outcome variable of interest**, I condition it using `if_else()` on one of the preexisting variables, `injuries_total`, which is an integer measurement of the *number* of individuals sustaining fatal, incapacitating, non-incapacitating, or possible injuries within a given traffic collision. The resulting binary outcome variable — `injurious` — is appended to the dataset as a new column and is coded as:\
 • `Yes` if `injuries_total` exceeds zero;\
 • `No` if `injuries_total` equals zero; and\
-• `NA` if `injuries_total` is a missing value
+• `NA` if `injuries_total` is a missing value\
 
 I have chosen to take the "classification route" with the new `injurious` variable — as opposed to the "regression route" with existing `injuries_total` variable — so as to preserve the injury-focused nature of my initial question whilst, at the same time, streamline the data downsizing/balancing process (which will be described in the following section).
 
-The following exhibits will explore the missingness and distribution of my `injurious` outcome variable using the original data:
+The following exhibits will explore the missingness and distribution of my `injurious` outcome variable using the original data.
 
 ```{r}
 #| echo: false
@@ -85,7 +85,7 @@ The following exhibits will explore the missingness and distribution of my `inju
 load(here("plots/missing_outcome.rda"))
 missing_injurious 
 ```
-The outcome variable `injurious` fortunately sees a missingness rate of only 0.22% (@tbl-miss-injurious), which means that the process of "throwing out" missing values during recipe building should not generate significant disruptions/bias. Next, I will explore the distribution of `injurious` across the raw dataset after excluding the 1,757 (out of 803,144) observations that lack data on injuriousness:
+The outcome variable `injurious` fortunately sees a missingness rate of only 0.22% (@tbl-miss-injurious), which means that the process of "throwing out" missing values during recipe building should not generate significant disruptions/bias. Next, I will explore the distribution of `injurious` across the raw dataset after excluding the 1,757 (out of 803,144) observations that lack data on injuriousness.
 ```{r}
 #| echo: false
 #| label: fig-distribution-outcome
@@ -103,15 +103,20 @@ distribution_outcome2 |>
 ```
 @fig-distribution-outcome and @tbl-distribution-outcome reveal a large amount of class imbalance in `injurious`: non-injurious collisions significantly outnumber injurious collisions, with the ratio between the two classes exceeding 6:1. This warrants **2 additional steps** that will be taken — dataset downsizing and stratified random sampling — which will be described in further detail in the next section.
 
-Specifically, the following section will explore in further detail my steps of  data splitting, model building/tuning, and recipe engineering.
+Specifically, this next section will explore in detail my steps of  data splitting, model building/tuning, and recipe engineering.
 
 ## Methods
+### Dataset Downsampling/Downsizing
 Prior to spending my dataset, I first run it through **2 prerequisite steps**: *downsampling* and *downsizing*. The sheer size of my dataset in its raw form (with 800,000+ rows) is unsustainable given my computational and temporal constraints; additionally, the class imbalance existing within my binomial outcome variable, `injurious`, warrants adjustments. I address both of these concerns in tandem through these 2 steps:\
 
 1. **Downsampling**: After throwing out missing data (~0.22% of rows), I use `slice_sample()` to randomly downsample my dataset with respect to the underrepresented class in `injurious`, "Yes". This reduces the number of observations from over 800,000 to about 220,000^[The number of observations in the underrepresented outcome variable class — collisions that *are* injurious — is about 110,000 in the raw dataset] and at the same time ensures a 1:1 class balance in my dummy outcome variable.\
 2. **Additional downsizing**: A 220,000-row dataset still exceeds my computational limits; as such, I further downsize my sample via random selection using `initial_split()`. The result is a ~44,000-row final dataset, exactly 20% as large as post-downsampling dataset and roughly 5-6% as large as the original dataset. 
 
-Next, I use an 80:20 proportion combined with stratified random sampling (with respect to `injurious`) in `initial_split()` in order to split this final dataset into **training** and **testing** sets. Within the training set of roughly 35,000 rows, I then use **V-fold cross-validation** to generate resampled data on which I later conduct my ensuing model competition process. Specifically, my resampling process entails randomly partioning my training set into 5 subsets (`v` = 5) repeated 3 times (`repeats` = 3), generating **15 resamples/folds** — each of which contains roughly 7,000 observations^[Within each 7,000-row fold, 80% of rows are allocated to training and the remaining 20% are allocated to testing since `v` = 5] — on which my various models are trained and evaluated.
+### Data Splitting
+
+Next, I use an *80:20 proportion* combined with *stratified random sampling* (with respect to `injurious`) in `initial_split()` in order to split this final dataset into **training** and **testing** sets. Within the training set of roughly 35,000 rows, I then use **V-fold cross-validation** to generate resampled data on which I later conduct my model competition process. Specifically, my resampling process entails randomly partioning my training set into 5 subsets (`v` = 5) repeated 3 times (`repeats` = 3), generating **15 resamples/folds** — each of which contains roughly 7,000 observations^[Within each 7,000-row fold, 80% of rows are allocated to training and the remaining 20% are allocated to testing since `v` = 5] — on which my various models are trained and evaluated.
+
+### Model Building/Tuning
 
 I define and, using a regular grid, tune the **7 following models**^[To accomodate the binomial nature of `injurious`, all 7 models use `mode` = "classification"] — the first 2 being *baseline* models — for use in my model competition:
 
@@ -121,7 +126,7 @@ I define and, using a regular grid, tune the **7 following models**^[To accomoda
 4. **Elastic net**: A *parametric* regularized regression model defined using `logistic_reg()` with the `glmnet` engine and the following tuning parameters:\
     a) Mixture explored over [0, 1] with 10 levels\
     b) Penalty explored over [-3, 0] with 10 levels\
-5. **K-nearest-neighbors**: A *non-parametric* algorithm defined using `nearest_neighbor()` with the `kknn` engine and the following tuning parameter:\
+5. **K-nearest neighbors**: A *non-parametric* algorithm defined using `nearest_neighbor()` with the `kknn` engine and the following tuning parameter:\
     a) Neighbors explored over [1, 15] with 5 levels\
 6. **Random forest**: A *non-parametric*, independently-trained algorithm defined using `rand_forest()` with the `ranger` engine, 500 `trees`, and the following tuning parameters:\
     a) Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
@@ -130,25 +135,137 @@ I define and, using a regular grid, tune the **7 following models**^[To accomoda
     a) Number of predictors randomly sampled at each split explored over [1, 5] with 4 levels\
     b) Minimum number of node data points required for further splitting explored over [2, 40] with 4 levels\
     c) Learning rate explored over [-5, -0.2] on log-10 scale with 4 levels
+    
+### Recipe Engineering
   
-Next, the recipes I embed across these 7 models are constructed along **2 independent dimensions**:\
+Next, the recipes I use in conjuction with my 7 models are constructed along *2 independent dimensions*:\
 
-1. **"Kitchen sink" .vs. "refined"**: These two recipe categories differ primarily on the basis of feature selection: my *kitchen sink* recipe uses as many predictors as possible, while my *refined* recipe is more selective with the predictors used...\
+1. **"Kitchen sink" .vs. "feature engineered"**: These differ on the basis of feature selection; my *kitchen sink* recipe uses as many predictors as possible, while my *feature engineered* recipe is more selective with the predictors used\
     a) The kitchen sink feature selection only *filters out* 26 "unacceptable" predictors^[View **Appendix: Technical Info** to see which 26 variables are filtered out] which are variables that:
         i) See missingness rates in excess of 90% (e.g. `workers_present_i`);
         ii) Are too closely correlated with `injurious` (e.g. `injuries_total`); 
         iii) Contain too many factor levels, often because they serve as identifiers (e.g. `crash_record_id`)
-    b) The refined feature selection, on the other hand, *actively includes* 11 predictors — `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month` — which I select on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to the **Appendix: EDA** of this report for predictors' definitions, as well as my univariate/bivariate/multivariate analyses of them in relation to my prediction problem at-hand]
+    b) The feature engineered selection, on the other hand, *actively includes* 11 predictors — `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month` — which I select on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to **Appendix: Technical** for predictor definitions; refer to **Appendix: EDA**for univariate/bivariate/multivariate analyses of predictors in relation to my predictive problem]
 2. **Parametric .vs. non-parametric**: Recipes that are compatible with my *3 parametric models* (null, logistic regression, and elastic net) differ from recipes meant for my *3 non-parametric models* (nearest neighbors, random forest, and boosted tree) in 2 ways...\
     a) Unlike their parametric counterparts, my non-parametric recipes use *one-hot encoding* when converting factor variables into numeric terms
-    b) Unlike their non-parametric counterparts, my parametric recipes incorporate *interaction terms* between 5 predictors^[This comparison only applies for the *refined* parametric/non-parametric recipes; the *kitchen sink* recipe is intentionally kept simple in its omission]: `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment`\
+    b) Unlike their non-parametric counterparts, my parametric recipes incorporate *interaction terms* between 5 predictors^[This comparison only applies for the *feature engineered* parametric/non-parametric recipes; the *kitchen sink* recipe is intentionally kept simple in its omission of interaction terms]: `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment`\
     
-These dimensions alone generate *4 possible recipe combinations*: parametric + kitchen sink, parametric + refined, non-parametric + kitchen sink, and non-parametric + refined. In addition to their differences, all models share the **same basic pre-processing steps** of a) imputing missing predictor values using nearest neighbors; b) dummy-encoding all factor predictors; c) removing predictor variables with zero variance; and d) centering/scaling all numeric predictors.
+These 2 dimensions alone generate *4 possible recipe combinations*: parametric + kitchen sink, parametric + feature engineered, non-parametric + kitchen sink, and non-parametric + feature engineered. In addition to their differences, all models share the **same basic pre-processing steps** of **a)** imputing missing predictor values using nearest neighbors; **b)** dummy-encoding all factor predictors; **c)** removing predictor variables with zero variance; and **d)** centering/scaling all numeric predictors.
 
-Lastly, I include an additional recipe designed *exclusively* for the naive Bayes model; this recipe is identical to the parametric + kitchen sink model, except it omits the pre-processing step of dummy-encoding factor variables. Thus, I end up with **5 total recipes**; my 2 baseline models (null and naive Bayes) are each individually fit with 1 recipe, while the other 5 models are each individually fit with 2 recipes.
-    
+Importantly, I include an additional recipe designed *exclusively* for the naive Bayes model; this recipe is identical to the parametric + kitchen sink model, except it omits the pre-processing step of dummy-encoding factor variables. I therefore end up with **5 total recipes**: the 4 combinations detailed above and the naive-Bayes-specific specification. 
+
+### Assessment Metric
+
+So that I can systematically compare the predictive performances of my various models and their recipe specifications, I will use the **`accuracy` assessment metric** — which measures the proportion of observations guessed correctly by a given model — for its easy interpretability as well as its compatibility with the binomial nature of my `injurious` outcome variable.
 
 ## Model Building & Selection Results
+
+### Model Candidates
+
+In the ensuing model competition process, my 2 baseline models (null and naive Bayes) are individually matched with 1 recipe^[The naive Bayes model uses its designated recipe specification while the null model uses the parametric + kitchen sink recipe specification], while the other 5 more-complex models are each individually matched with 2 recipes. The **recipe-by-recipe breakdown** is as follows:
+
+1. *Naive Bayes recipe only*: matched only to the naive Bayes model;\
+2. *Parametric + kitchen sink recipe only:* matched only to the null model;\
+3. *Parametric + kitchen sink recipe AND parametric + feature engineered recipe*: matched to the logistic regression and elastic net models;\
+4. *Non-parametric + kitchen sink recipe AND non-parametric + feature engineered recipe*: matched to the nearest neighbors, random forest, and boosted tree models
+
+### Fitted Results: General Takeaways
+
+The following exhibit displays the `accuracy` results of the best-performing candidates for each model/recipe combination^[For context, complex models that are fit using *kitchen sink* recipes are denoted with "1", and complex models that are fit using *feature engineered* recipes are denoted with "2"], fitted and then averaged across the 15 resamples/folds:
+
+```{r}
+#| echo: false
+#| label: tbl-fit-resamples1
+#| tbl-cap: Model competition results using the `accuracy` metric
+load(here("results/combined_accuracy.rda"))
+combined_accuracy |>
+  datatable()
+```
+Below is the same table, but rearranged such that the best-performing models are at the top:
+```{r}
+#| echo: false
+#| label: tbl-fit-resamples2
+#| tbl-cap: Model competition results using the `accuracy` metric, arranged in descending order
+load(here("results/combined_accuracy.rda"))
+combined_accuracy |>
+  arrange(desc(mean)) |>
+  datatable()
+```
+
+There are **3 general takeaways** from @tbl-fit-resamples1 and @tbl-fit-resamples2:\
+
+1. The **top-performing individual model** per the `accuracy` metric is the *boosted tree model fit using the kitchen sink recipe*;\
+2. Across all complex model types, the **kitchen sink recipe strictly dominates the feature engineered recipe** when it comes to predictive accuracy;\
+    a) This suggests that, in my case, feature engineering is **not worth it**: it adds additional effort and yields worse results\
+    b) This **does not** necessarily suggest, however, that a kitchen sink strategy for feature selection is in general strictly superior to a more selective one\
+        i) In my case, it is likely that I may have simply omitted key variables that I *should* have included in the construction of my feature engineered recipe
+3. Among the top-performing complex models, there appear to be **close-to-zero differences** in predictive performance\
+    a) For instance, the difference in mean `accuracy` between my top performer (`boosted1`) and the "runner-up" (`rf1`) is only 0.0003496, which is merely a 0.0457% difference in performance\
+    b) Nonetheless, the 5 non-baseline models do appear to perform with greater predictive accuracy than the baseline `null` and `nbayes` models at a non-insignificant level
+    
+### The Top-Performing Model Candidate
+
+@tbl-fit-resamples2 reveals that, holding the recipe constant, there are **extremely small differences** accuracy-wise between the boosted tree, random forest, logistic regression, and elastic net models to the point that it becomes difficult to definitively settle on a "best" model candidate. For the purpose of this project, however, will I choose **`boosted1` — the boosted tree model fit using the kitchen sink recipe — to be my final model candidate**; I do this for 2 overarching reasons:\
+
+1. Even though the random forest model outperforms the boosted tree model on the *feature engineered recipe* (compare `rf2` to `boosted2`), it has already been established that the *kitchen sink recipe* is strictly dominant regardless of model type\
+    a. To this point, the best-performing candidate on the *kitchen sink recipe* is the boosted tree model\
+2. Since the difference in predictive performance between the top candidates is near-zero, the "best" option for me is still to **default to the top-performing candidate** — regardless of the gap in performance — unless I have a compelling external reason to not do so
+    b. In this case, the fact that the "performance gaps" between candidates remain consistently small across both recipes tells me that there appears to be no compelling reason to actively avoid the boosted tree model
+
+More specifically, the top-performing model (`boosted1`) on average correctly predicts the injury status of approximately 76.60% of collisions across the 15 resamples/folds. Note, however, that this winning candidate represents only *1 of the 64* boosted tree models created via tuning combinations during the model-building process. Therefore, the following exhibits explore in further detail the particular **tuning parameters** of the the winning `boosted1` model:
+```{r}
+#| echo: false
+#| label: fig-final-parameters
+#| fig-cap: A visual inspection of tuning parameter performances for the boosted tree model class
+load(here("plots/final_parameters.rda"))
+final_parameters +
+  theme_minimal()
+```
+@fig-final-parameters reveals a few notable findings regarding **boosted tree tuning**:
+
+1. Top-performing boosted tree models per the `accuracy` metric appear to cluster around a particular point in the bottom-right graph (`learn_rate` = -1.8, log scale)\
+    a. At this point, `mtry` equals its maximum of 5 while `min_n` equals its minimum of 2\
+2. A higher `mtry` value over a range of [1, 5] *generally* corresponds to greater model performance but this cannot be extrapolated across *all* cases\
+    a. Notably, this trend reverses at the highest possible `learn_rate` over [-5, -0.2] of -0.2 (in log scale)\
+3. A lower `min_n` value over a range of [2, 40] *generally* corresponds to greater model performance, but this cannot be extrapolated across *all* cases\
+    a. In parallel to above's finding, this trend reverses at the highest possible `learn_rate` of -0.2 (in log scale)
+    
+The endline result from @fig-final-parameters regarding our singular best-performing boosted tree model can be summarized in the following table:
+```{r}
+#| echo: false
+#| label: tbl-final-hyperparameters
+#| tbl-cap: Exact hyperparameter values for the top-performing model, `boosted1`
+load(here("plots/final_hyperparameters.rda"))
+final_hyperparameters |>
+  kable()
+```
+The following statement can be drawn from @tbl-final-hyperparameters: ***conditional on having a `learn_rate` equaling -1.8 (log-scaled), my boosted tree model performs with the greatest predictive accuracy using the smallest possible `min_n` and largest possible `mtry` values of 2 and 5 respectively***. The most puzzling conclusion from this tuning analysis is that there is no clear-cut answer regarding the optimal `learn_rate`; it does not seem to follow a predictable "ceteris-paribus" pattern with respect to `accuracy`, which is particularly concerning because the value of `learn_rate` appears to also determine the optimal hyperparameter values for `min_n` and `mtry` as well. As such, a case can be made that **further tuning should be explored** with respect to the `learn_rate` parameter; perhaps a more optimal value exists and can potentially be uncovered via, for example, an exploration conducted across more levels.
+
+### Additional Tuning Analysis: Other Candidates
+
+The following exhibit explores the optimal tuning parameter values for the best-performing representatives of the **3 other model types** marked for tuning: random forest, K-nearest neighbors, and elastic net.
+
+```{r}
+#| echo: false
+#| label: tbl-additional-tuning
+#| tbl-cap: Optimal hyperparameter values for the
+load(here("plots/additional_tuning.rda"))
+additional_tuning |>
+  select(c(
+    model,
+    penalty,
+    mixture,
+    neighbors,
+    mtry,
+    min_n,
+    learn_rate
+  )) |>
+  slice_head(n = 6) |>
+  datatable()
+
+```
+
+@tbl-additional-tuning reveals that the optimal tuning hyperparameters for each model are generally consistent across the kitchen sink and feature engineered recipes; the only exception to this is the elastic net model, whose optimal hyperparameter value for `penalty` slightly differs between the two.
 
 ## Final Model Analysis
 
@@ -156,8 +273,12 @@ Lastly, I include an additional recipe designed *exclusively* for the naive Baye
 
 ## References
 
-*How many licensed drivers are there in the US?* (2018). Hedges & Company. [https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:\~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license](https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license).
+*How many licensed drivers are there in the US?* (2018). Hedges & Company. [https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:\~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license](https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license)
 
-Yellman, M. A. & Sauber-Schatz, E. K. (2022). Motor Vehicle Crash Deaths --- United States and 28 Other High-Income Countries, 2015 and 2019. *Morbidity and Mortality Weekly Report (MMWR)*, 71(26), 837-843. <https://www.cdc.gov/mmwr/volumes/71/wr/mm7126a1.htm?s_cid=mm7126a1_w#suggestedcitation>
+Yellman, M. A. & Sauber-Schatz, E. K. (2022). Motor Vehicle Crash Deaths --- United States and 28 Other High-Income Countries, 2015 and 2019. *Morbidity and Mortality Weekly Report (MMWR)*, 71(26), 837-843. [https://www.cdc.gov/mmwr/volumes/71/wr/mm7126a1.htm?s_cid=mm7126a1_w#suggestedcitation](https://www.cdc.gov/mmwr/volumes/71/wr/mm7126a1.htm?s_cid=mm7126a1_w#suggestedcitation)
 
 ## Appendix: EDA
+
+## Appendix: Technical Info
+
+(here, define 11 predictors used in `feature engineered` as well as the 26 variables omitted from `kitchen sink`)
