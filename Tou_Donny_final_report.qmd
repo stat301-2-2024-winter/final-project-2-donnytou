@@ -894,6 +894,8 @@ Relative to those occurring on straight roads, collisions occurring on curved ro
 
 ### Univariate EDA: Predictor Class Imbalances
 
+8 of my 11 predictors used in the feature engineered recipes are **categorical/factorial/nominal**. As such, I dedicate the following univariate exhibits to exploring the class imbalances among them.
+
 #### 1. Street Alignment
 ```{r}
 #| echo: false
@@ -950,6 +952,13 @@ traffic_data_throwaway |>
 #| label: fig-imbalance3
 #| fig-cap: Class Imbalance — Trafficway Type
 traffic_data_throwaway |>
+  mutate(trafficway_type = fct_collapse(
+    trafficway_type,
+    "DIVIDED" = c(
+      "DIVIDED - W/MEDIAN (NOT RAISED)",
+      "DIVIDED - W/MEDIAN BARRIER"
+    )
+  )) |>
   ggplot(aes(trafficway_type)) +
   geom_bar(fill = "darkorange1") +
   labs(
@@ -965,6 +974,13 @@ traffic_data_throwaway |>
 #| label: tbl-imbalance3
 #| tbl-cap: Trafficway Type, Counted
 traffic_data_throwaway |>
+  mutate(trafficway_type = fct_collapse(
+    trafficway_type,
+    "DIVIDED" = c(
+      "DIVIDED - W/MEDIAN (NOT RAISED)",
+      "DIVIDED - W/MEDIAN BARRIER"
+    )
+  )) |>
   count(trafficway_type) |>
   knitr::kable()
 ```
