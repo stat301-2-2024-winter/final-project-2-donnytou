@@ -116,6 +116,23 @@ Prior to spending my dataset, I first run it through **2 prerequisite steps**: *
 
 Next, I use an *80:20 proportion* combined with *stratified random sampling* (with respect to `injurious`) in `initial_split()` in order to split this final dataset into **training** and **testing** sets. Within the training set of roughly 35,000 rows, I then use **V-fold cross-validation** to generate resampled data on which I later conduct my model competition process. Specifically, my resampling process entails randomly partioning my training set into 5 subsets (`v` = 5) repeated 3 times (`repeats` = 3), generating **15 resamples/folds** — each of which contains roughly 7,000 observations^[Within each 7,000-row fold, 80% of rows are allocated to training and the remaining 20% are allocated to testing since `v` = 5] — on which my various models are trained and evaluated.
 
+```{r}
+#| echo: false
+#| label: tbl-data-split
+#| tbl-cap: Data set observation count post-splitting
+load(here("data_splits/traffic_split.rda"))
+traffic_split 
+load(here("data_splits/traffic_train.rda"))
+traffic_train |>
+  count() |>
+  kable(caption = "# of training set rows post-split")
+load(here("data_splits/traffic_test.rda"))
+traffic_test |>
+  count() |>
+  kable(caption = "# of testing set rows post-split")
+```
+The series of visuals in @tbl-data-split reveal that the 80:20-proportion split has been successfully implemented.
+
 ### Model Building/Tuning
 
 I define and, using a regular grid, tune the **7 following models**^[To accomodate the binomial nature of `injurious`, all 7 models use `mode` = "classification"] — the first 2 being *baseline* models — for use in my model competition:
@@ -261,13 +278,56 @@ additional_tuning |>
     learn_rate
   )) |>
   slice_head(n = 6) |>
+  select(-learn_rate) |>
   datatable()
 
 ```
 
-@tbl-additional-tuning reveals that the optimal tuning hyperparameters for each model are generally consistent across the kitchen sink and feature engineered recipes; the only exception to this is the elastic net model, whose optimal hyperparameter value for `penalty` slightly differs between the two.
+@tbl-additional-tuning reveals that the optimal tuning hyperparameters for each model are generally consistent across the kitchen sink and feature engineered recipes; the only exception to this is the elastic net model, whose optimal hyperparameter value for `penalty` slightly differs between the two. As for the remaining 2 models:\
+
+1. *K-nearest neighbors model*: Its predictive performance is optimized with the largest possible number of `neighbors` (15)
+2. *Random forest model*: Its predictive performance is optimized with the largest `mtry` value (5) and a moderate number of `min_n` (27)
+
+### Building More Complex Models: Was It Worth It?
 
 ## Final Model Analysis
+
+The final component of my predictive modelling process entails fitting my best-performing model workflow — `boosted1` — to my testing set of roughly 9,000 observations. Prior to this, I take **2 prerequisite steps**:\
+
+1. I extract the underlying feature engineering specifications (i.e. the non-parametric kitchen sink recipe) as well as the optimal tuning hyperparameters (i.e. `mtry` = 5, `min_n` = 2, and `learn_rate` = -0.2 log-scaled) of my winning model, `boosted1`\
+2. I then train the model workflow on my whole ~35,000-row training dataset and save the result as a fitted model object
+
+Finally, I apply the resulting fitted model to my testing set of ~9,000 rows — all in order to see how this winning model performs on **never-before-seen-data**. The following exhibits display my results.
+
+```{r}
+#| echo: false
+#| label: tbl-final-tibble
+#| tbl-cap: Tibble of predicted class probabilities and actual/true outcomes
+load(here("results/final_tibble.rda"))
+final_tibble |>
+  DT::datatable()
+```
+@tbl-final-tibble provides a side-by-side comparison between the actual and predicted `injurious` values of the 8,820 traffic collisions within my testing set, as well as the class probabilities assigned to each of the 2 levels — `Yes` and `No` — per collision.
+
+```{r}
+#| echo: false
+#| label: tbl-final-accuracy
+#| tbl-cap: Performance summary of `boosted1` on testing data using `accuracy`
+load(here("results/final_accuracy.rda"))
+final_accuracy |>
+  kable()
+```
+Using the `accuracy` metric, @tbl-final-accuracy reveals that the winning boosted tree model correctly predicts the injury status of a given collision **76.497%** of the time within the testing set — down from 76.600% across the folds. This a 0.103-percentage-point (or a 0.134%) decline in `accuracy`, which is to be expected since this model — trained on resampled training data — is now being fit on never-before-seen data.
+
+Now, let's further decompose this predictive assessment using a **confusion matrix**.
+```{r}
+#| echo: false
+#| label: fig-confusion-matrix
+#| fig-cap: A 2x2 confusion matrix comparing predicted .vs. actual `injurious` class values.
+load(here("plots/final_conf.rda"))
+final_conf
+```
+
 
 ## Conclusion
 
