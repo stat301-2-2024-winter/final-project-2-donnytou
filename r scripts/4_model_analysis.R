@@ -128,4 +128,10 @@ save(
 )
 
 
+additional_tuning <- combined_accuracy |>
+  slice_tail(n = 8)
+save(
+  additional_tuning,
+  file = here("plots/additional_tuning.rda")
+)
 

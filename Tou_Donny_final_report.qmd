@@ -162,7 +162,7 @@ Next, the recipes I use in conjuction with my 7 models are constructed along *2 
         i) See missingness rates in excess of 90% (e.g. `workers_present_i`);
         ii) Are too closely correlated with `injurious` (e.g. `injuries_total`); 
         iii) Contain too many factor levels, often because they serve as identifiers (e.g. `crash_record_id`)
-    b) The feature engineered selection, on the other hand, *actively includes* 11 predictors — `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month` — which I select on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to **Appendix: Technical** for predictor definitions; refer to **Appendix: EDA**for univariate/bivariate/multivariate analyses of predictors in relation to my predictive problem]
+    b) The feature engineered selection, on the other hand, *actively includes* 11 predictors^[refer to `README.md` within the `data/` subdirectory for variable definitions] — `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month` — which I select on the basis of having observable/notable bivariate relationships with `injurious`^[Refer to **Appendix: EDA** for univariate/bivariate/multivariate analyses of predictors in relation to my predictive problem]
 2. **Parametric .vs. non-parametric**: Recipes that are compatible with my *3 parametric models* (null, logistic regression, and elastic net) differ from recipes meant for my *3 non-parametric models* (nearest neighbors, random forest, and boosted tree) in 2 ways...\
     a) Unlike their parametric counterparts, my non-parametric recipes use *one-hot encoding* when converting factor variables into numeric terms
     b) Unlike their non-parametric counterparts, my parametric recipes incorporate *interaction terms* between 5 predictors^[This comparison only applies for the *feature engineered* parametric/non-parametric recipes; the *kitchen sink* recipe is intentionally kept simple in its omission of interaction terms]: `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment`\
@@ -288,7 +288,15 @@ additional_tuning |>
 1. *K-nearest neighbors model*: Its predictive performance is optimized with the largest possible number of `neighbors` (15)
 2. *Random forest model*: Its predictive performance is optimized with the largest `mtry` value (5) and a moderate number of `min_n` (27)
 
-### Building More Complex Models: Was It Worth It?
+### Building More Complex Models: Is It Worth It?
+
+Perhaps one of the most important queries to investigate in the context of model competition/selection is **whether it is truly worth it** to build more complex models which, in my case, are the logistic regression, elastic net, K-nearest neighbors, random forest, and boosted tree models. Given my results from @tbl-fit-resamples2, I draw the following **2 conclusions**: 
+
+1.  At a fundamental level, it appears to be **certainly worth it** to build more complex models beyond the baselines\
+    a) Relative to the *null* baseline model, the top 7 competitors see accuracy rates at least 25 percentage points (or 50%) higher\
+    b) Relative to the *naive Bayes* baseline model, the same top 7 competitors see accuracy rates around 10-11 percentage points (or 15-17%) higher\
+2. There is, however, a catch: *conditional on having more-complex models*, it **does not appear to be worth it** to introduce even more complexity\
+    a) For instance, `boosted2` performs only slightly better than `en2` using the same underlying recipe
 
 ## Final Model Analysis
 
@@ -317,7 +325,7 @@ load(here("results/final_accuracy.rda"))
 final_accuracy |>
   kable()
 ```
-Using the `accuracy` metric, @tbl-final-accuracy reveals that the winning boosted tree model correctly predicts the injury status of a given collision **76.497%** of the time within the testing set — down from 76.600% across the folds. This a 0.103-percentage-point (or a 0.134%) decline in `accuracy`, which is to be expected since this model — trained on resampled training data — is now being fit on never-before-seen data.
+Using the `accuracy` metric, @tbl-final-accuracy reveals that the winning boosted tree model correctly predicts the injury status of a given collision **76.497%** of the time within the testing set.
 
 Now, let's further decompose this predictive assessment using a **confusion matrix**.
 ```{r}
@@ -327,7 +335,25 @@ Now, let's further decompose this predictive assessment using a **confusion matr
 load(here("plots/final_conf.rda"))
 final_conf
 ```
+@fig-confusion-matrix confirms our finding from @tbl-final-accuracy: (3361 + 3386) / (3361 + 3386 + 1024 + 1049) = 6747 / 8820 = **76.497%** of training-set traffic collisions are correctly predicted. Notably:
 
+1. 3,386 predictions are **true positives** — injurious collisions that are correctly predicted to be injurious by the model\
+2. 3,361 predictions are **true negatives** — non-injurious collisions that are correctly predicted to be non-injurious by the model\
+3. 1,049 predictions are **false positives** — collisions that are predicted to be injurious but are actually non-injurious\
+4. 1,024 predictions are **false negatives** — collisions that are predicted to be non-injurious but are actually injurious
+
+Overall, a **final accuracy metric of 76.497%** on the assessment data is a slight decline from 76.60% — the final model's accuracy metric on the *resampled* data — which is a 0.103-percentage-point decrease. This is to be expected, since `boosted1`, which was trained across the resampled training folds, is now fit on "never-before-seen" data. 
+
+Overall, I believe that this is a **solid performance**: even on never-before-seen data, this final model's accuracy metric is **a)** over 25 percentage points (50%) more accurate than the null model and **b)** over 11 percentage points (17%) more accurate than the naive Bayes model, both of which are assessed across the 15 resamples. While this is not a magnificent performance, I believe it **does justify** building more complex models beyond just the baselines. 
+
+Still, this model is **far from perfect**; analyses from previous reports identify **3 key caveats** to the efficacy of this final model:
+
+1. The underlying kitchen sink recipe matched with this recipe is not necessarily optimal\
+    a) Its superior performance against my feature engineered recipe may point towards a flaw in my feature engineering — not necessarily the dominance of a kitchen sink selection strategy\
+2. The "objectively optimal" hyperparameter values for `min_n`, `mtry`, and `learn_rate` are still not exactly known\
+    a) This analysis merely identified the best-performing tuning set among 64 possible boosted-tree-model combinations, but more combinations exist and should be explored if computational constraints allow for it\
+3. Although `boosted1` is the top performer among candidates in @tbl-fit-resamples2, the differences across the upper 50% of candidates are marginal at-best\
+    a) If this model is "any good", then it is likely that the runner-ups are as well to very similar degrees
 
 ## Conclusion
 
@@ -339,6 +365,24 @@ Yellman, M. A. & Sauber-Schatz, E. K. (2022). Motor Vehicle Crash Deaths --- Uni
 
 ## Appendix: EDA
 
-## Appendix: Technical Info
+In this section, I detail the **bivariate** and **multivariate** EDA exhibits used to justify my *predictor* and *interaction term* selections for use in my feature engineered recipe. I also detail the **univariate** explorations conducted on factor-based features to explore potential class imbalances. 
 
-(here, define 11 predictors used in `feature engineered` as well as the 26 variables omitted from `kitchen sink`)
+Recall that the feature selection/engineering steps *unique to this recipe* consist of the following components:
+
+1. **11 predictors/"features"** ^[refer to `README.md` within the `data/` subdirectory for variable definitions]: `alignment`, `posted_speed_limit`, `lane_cnt`, `intersection_related_i`, `trafficway_type`, `device_condition`, `report_type`, `first_crash_type`, `num_units`, `lighting_condition`, and `month`\
+2. **4 interaction terms** created using 5 features — `lighting_condition`, `num_units`, `trafficway_type_`, `intersection_related_i`, and `alignment` — and defined as the following...\
+    a. An interaction term between `num_units` and `lighting_condition`\
+    b. An interaction term between `num_units` and `trafficway_type`\
+    c. An interaction term between `alignment` and `lighting_condition`\
+    d. An interaction term between `alignment` and `intersection_related_i`
+    
+The following **3 subsections** are dedicated to bivariate, multivariate, and univariate EDA exhibits, respectively.
+
+### Bivariate EDA: Feature Selection
+
+### Multivariate EDA: Interaction Term Selection
+
+### Univariate EDA: Class Imbalances
+    
+
+## Appendix: Technical Info

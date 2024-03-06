@@ -35,6 +35,10 @@ final_accuracy <- final_tibble |>
   )
 ### save out
 save(
+  final_tibble,
+  file = here("results/final_tibble.rda")
+)
+save(
   final_accuracy,
   file = here("results/final_accuracy.rda")
 )

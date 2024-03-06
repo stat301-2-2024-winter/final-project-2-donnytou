@@ -69,16 +69,20 @@ traffic_fold <- vfold_cv(
 
 # save out data
 save(
+  traffic_split,
+  file = here("data_splits/traffic_split.rda")
+)
+save(
   traffic_train,
-  file = here("data/traffic_train.rda")
+  file = here("data_splits/traffic_train.rda")
 )
 save(
   traffic_test,
-  file = here("data/traffic_test.rda")
+  file = here("data_splits/traffic_test.rda")
 )
 save(
   traffic_fold,
-  file = here("data/traffic_fold.rda")
+  file = here("data_splits/traffic_fold.rda")
 )
 
 
