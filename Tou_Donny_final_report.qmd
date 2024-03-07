@@ -358,6 +358,8 @@ Still, this model is **far from perfect**; analyses from previous reports identi
     
 ## Conclusion
 
+In summary, this report details my journey of predicting traffic collision injury outcomes in Chicago. Utilizing a robust dataset and strategic downsampling/downsampling, the boosted tree model, fused with the "kitchen sink" recipe, emerges as the top performer with an average accuracy rate of 76.60% across resamples. The analysis delves into the nuanced relationships among hyperparameters, emphasizing the importance of tuning, especially for the learn_rate parameter. The final model, when evaluated on a separate testing set, maintains a solid accuracy rate of 76.497%, surpassing the null and naive Bayes baseline models. This report concludes by advocating for continuous refinement and exploration to enhance predictive modelling robustness — a practice that is especially important when it comes to devising targeted traffic interventions that can potentially save thousands of lives.
+
 ## References
 
 *How many licensed drivers are there in the US?* (2018). Hedges & Company. [https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:\~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license](https://hedgescompany.com/blog/2018/10/number-of-licensed-drivers-usa/#:~:text=Across%20all%20age%20groups%2C%2084.1,population%20has%20a%20driver's%20license)
