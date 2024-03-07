@@ -120,31 +120,3 @@ save(
   missing_visual,
   file = here("plots/missing_visual.rda")
 )
-
-# outcome variable exploration — distribution + missingness
-traffic_data_cleaned |>
-  ggplot(aes(injuries_total)) +
-  geom_bar(fill = "steelblue") +
-  theme_classic() +
-  labs(
-    title = "Distribution of the number of traffic incident injuries",
-    subtitle = "The vast majority of traffic collisions leave involved agents unscathed"
-  ) +
-  scale_x_continuous(breaks = c(0:20))
-traffic_data_cleaned |>
-  filter(injuries_total >= 5) |>
-  ggplot(aes(injuries_total)) +
-  geom_bar(fill = "steelblue") +
-  theme_classic() +
-  labs(
-    title = "Distribution of the number of traffic incident injuries",
-    subtitle = "Restricted to incidents involving at least 5 injured agents"
-  ) +
-  scale_x_continuous(breaks = c(5:20))
-traffic_data_cleaned |>
-  count(injuries_total) |>
-  datatable()
-traffic_data_cleaned |>
-  select(injuries_total) |>
-  miss_var_summary() |>
-  kable()

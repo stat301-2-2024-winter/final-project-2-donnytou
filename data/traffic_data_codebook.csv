@@ -1,0 +1,51 @@
+Variable,Meaning
+crash_record_id,This number can be used to link to the same crash in the Vehicles and People datasets. This number also serves as a unique ID in this dataset.
+crash_date_est_i,Crash date estimated by desk officer or reporting party (only used in cases where crash is reported at police station days after the crash)
+crash_date,Date and time of crash as entered by the reporting officer
+posted_speed_limit,"Posted speed limit, as determined by reporting officer"
+traffic_control_device,"Traffic control device present at crash location, as determined by reporting officer"
+device_condition,"Condition of traffic control device, as determined by reporting officer"
+weather_condition,"Weather condition at time of crash, as determined by reporting officer"
+lighting_condition,"Light condition at time of crash, as determined by reporting officer"
+first_crash_type,Type of first collision in crash
+trafficway_type,"Trafficway type, as determined by reporting officer"
+lane_cnt,"Total number of through lanes in either direction, excluding turn lanes, as determined by reporting officer (0 = intersection)"
+alignment,"Street alignment at crash location, as determined by reporting officer"
+roadway_surface_cond,"Road surface condition, as determined by reporting officer"
+road_defect,"Road defects, as determined by reporting officer"
+report_type,"Administrative report type (at scene, at desk, amended)"
+crash_type,A general severity classification for the crash. Can be either Injury and/or Tow Due to Crash or No Injury / Drive Away
+intersection_related_i,A field observation by the police officer whether an intersection played a role in the crash. Does not represent whether or not the crash occurred within the intersection.
+not_right_of_way_i,Whether the crash begun or first contact was made outside of the public right-of-way.
+hit_and_run_i,Crash did/did not involve a driver who caused the crash and fled the scene without exchanging information and/or rendering aid
+damage,A field observation of estimated damage.
+date_police_notified,Calendar date on which police were notified of the crash
+prim_contributory_cause,"The factor which was most significant in causing the crash, as determined by officer judgment"
+sec_contributory_cause,"The factor which was second most significant in causing the crash, as determined by officer judgment"
+street_no,"Street address number of crash location, as determined by reporting officer"
+street_direction,"Street address direction (N,E,S,W) of crash location, as determined by reporting officer"
+street_name,"Street address name of crash location, as determined by reporting officer"
+beat_of_occurrence,Chicago Police Department Beat ID. Boundaries available at https://data.cityofchicago.org/d/aerh-rz74
+photos_taken_i,Whether the Chicago Police Department took photos at the location of the crash
+statements_taken_i,Whether statements were taken from unit(s) involved in crash
+dooring_i,"Whether crash involved a motor vehicle occupant opening a door into the travel path of a bicyclist, causing a crash"
+work_zone_i,Whether the crash occurred in an active work zone
+work_zone_type,"The type of work zone, if any"
+workers_present_i,Whether construction workers were present in an active work zone at crash location
+num_units,"Number of units involved in the crash. A unit can be a motor vehicle, a pedestrian, a bicyclist, or another non-passenger roadway user. Each unit represents a mode of traffic with an independent trajectory."
+most_severe_injury,Most severe injury sustained by any person involved in the crash
+injuries_total,"Total persons sustaining fatal, incapacitating, non-incapacitating, and possible injuries as determined by the reporting officer"
+injuries_fatal,Total persons sustaining fatal injuries in the crash
+injuries_incapacitating,"Total persons sustaining incapacitating/serious injuries in the crash as determined by the reporting officer. Any injury other than fatal injury, which prevents the injured person from walking, driving, or normally continuing the activities they were capable of performing before the injury occurred. Includes severe lacerations, broken limbs, skull or chest injuries, and abdominal injuries"
+injuries_non_incapacitating,"Total persons sustaining non-incapacitating injuries in the crash as determined by the reporting officer. Any injury, other than fatal or incapacitating injury, which is evident to observers at the scene of the crash. Includes lump on head, abrasions"
+injuries_reported_not_evident,"Total persons sustaining possible injuries in the crash as determined by the reporting officer. Includes momentary unconsciousness, claims of injuries not evident, limping, complaint of pain, nausea, and hysteria."
+injuries_unknown,Total persons sustaining no injuries in the crash as determined by the reporting officer
+injurious,"Well crash involved at least 1 persons sustaining fatal, incapacitating, non-incapacitating, and possible injuries as determined by the reporting officer"
+crash_hour,The hour of the day component of CRASH_DATE
+crash_day_of_week,The day of week component of CRASH_DATE
+crash_month,The month component of CRASH_DATE
+latitude,"The latitude of the crash location, as determined by reporting officer, as derived from the reported address of crash"
+longitude,"The longitude of the crash location, as determined by reporting officer, as derived from the reported address of crash"
+location,"The crash location, as determined by reporting officer, as derived from the reported address of crash, in a column type that allows for mapping and other geographic analysis in the data portal software"
+traffic_control_device_i    ,"Whether a traffic control device is present at crash location, as determined by reporting officer"
+fatal_i,Whether crash involved at least 1 fatal injury as determined by the reporting officer
