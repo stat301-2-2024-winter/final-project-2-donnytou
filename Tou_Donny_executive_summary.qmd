@@ -1,0 +1,69 @@
+---
+title: "Executive Summary: Predicting the Injuriousness of Traffic Collisions Occuring in the City of Chicago: A Final Report"
+subtitle: |
+  | Final Project 
+  | Data Science 2 with R (STAT 301-2)
+author: "Donny Tou"
+date: today
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    
+execute:
+  echo: false
+  warning: false
+
+from: markdown+emoji
+---
+
+## Introduction
+The ubiquity of driving in the daily lives of Americans brings both convenience and significant risks. While driving offers cost-effective and time-efficient transportation, it is also associated with an alarming frequency of traffic collisions, resulting in severe injuries and fatalities. This report aims to predict the injury status of traffic collisions occurring in the City of Chicago, IL, focusing on the the following classification-based predictive question: **In a given traffic collision, will any of the unfortunate individuals involved emerge injured?**
+
+## Data 
+
+The dataset I use comprises records of over 800,000 traffic collisions occurring from 2015 to the present, obtained from the Chicago Police Department (2015). It consists of 50 variables, providing a comprehensive view of each traffic incident and the actor(s) involved. 
+
+I employ a **2-pronged strategy** to simultaneously shrink data size and address class imbalances in my binary outcome variable: I first discard missing data and randomly downsample the dataset to about 220,000 rows; I then randomly extract 20% of this downsampled data to use for my predictive analysis.The final dataset, comprising approximately 44,000 rows, strikes a balance by presenting a representative sample of both injurious and non-injurious collisions. The data splitting phase involves an 80:20 division into training and testing sets, supplemented by V-fold cross-validation (5 folds, 3 repeats) on the training set in order to set the stage for model competition.
+
+## Model Competition and Selection: Findings
+
+The ensuing model competition phase explores an array of candidates, whose combinations differ on a model-by-model, as well as recipe-by-recipe, basis. In total, `accuracy` metrics for **12 candidate model-recipe combinations** are averaged and compared across resampled data, generating the following insights:\
+
+1. **Winning candidate**: Selected on the basis of having the highest `accuracy` metric, the top-performing individual model is the boosted tree model fit using a "kitchen sink" recipe specification\
+    a) This model boasts an average accuracy rate of **76.60%** across resamples/folds\
+2. **Kitchen sink recipe superiority**: Across a diverse set of model types, the kitchen sink recipe proves to be more effective than its feature engineered counterpart, suggesting that — at least in this predictive context — feature engineering adds complexity without commensurate gains in predictive power\
+3. **Noticeable improvements over baseline models**: Results justify the adoption of complex models beyond baselines, as evidenced by accuracy rates that are substantially higher than those of the baseline null and naive Bayes models\
+4. **Negligible performance differences among top models**: Among the top-performing complex models, however, only marginal differences in predictive power are observed
+    a) For instance, the superiority of the winning model over the random-forest runner-up is minimal (0.0457%) using the same recipe, suggesting that — *conditional on having some complexity* — introducing more complexity is not necessarily better\
+    b) Thus, this study emphasizes the importance of stopping at a certain level of complexity beyond the baseline model constructions
+    
+Further analysis into the the winning boosted tree model reveals a few notable findings regarding **tuning parameter optimization**:
+
+1. **`mtry` tuning**: Higher values of `mtry` over a a range of [1, 5] *generally* correspond to greater model performance, but this cannot be extrapolated across *all* cases\
+    a. Notably, this trend reverses at the highest possible `learn_rate` over [-5, -0.2] of -0.2 (in log scale)\
+2. **`min_n` tuning**: Similarly, lower `min_n` values over a range of [2, 40] *generally* correspond to greater model performance, but this cannot be extrapolated across *all* cases\
+    a. In parallel to above's finding, this trend reverses at the highest possible `learn_rate` of -0.2 (in log scale)
+    
+In other words, the optimal selection of hyperparameter values for `mtry` and `min_n` appears to *depend on* the corresponding tuning selection for `learn_rate`, suggesting an intricate relationship among boosted tree parameters. As such, a case can be made that **further tuning should be explored** with respect to the `learn_rate` parameter, whose true "optimal" value is not fully uncovered by this study. Perhaps more optimal hyperparameter value combination exists and can potentially be uncovered via, for example, an exploration conducted across more levels.
+
+## Final Model Analysis: Findings
+
+In the conclusive phase of my predictive modeling process, the top-performing boosted tree model undergoes evaluation on the previously untouched testing set consisting of roughly 9,000 observations, generating the following results:\
+
+1. **Performance Summary**: Applying the winning model to the testing set yields an accuracy metric of **76.497%** — a slight decrease from the resampled data\
+    a. This is to be expected as the encounters new, never-before-seen data\
+2. **Complexity Justification**: Despite the minor decline, the final model's accuracy remains *notably superior to baseline models*, surpassing the null model by over 25 percentage points (50%) and outperforming the naive Bayes model by over 11 percentage points (17%)\
+3. **Performance Decomposition**: A decomposition of the model's predictive performance is as follows:\
+    a) *True Positives*: 3,386 injurious collisions are correctly predicted as injurious\
+    b) *True Negatives*: 3,361 non-injurious collisions are correctly predicted as non-injurious\
+    c) *False Positives*: 1,049 non-injurious collisions are wrongly predicted as injurious\
+    d) *False Negatives*: 1,024 injurious collisions are wrongly predicted as non-injurious
+
+While the winning boosted tree model demonstrates a solid level predictive accuracy on the testing set, continual refinement and exploration are warranted to enhance its robustness and address identified caveats.
+
+
+
+
+
