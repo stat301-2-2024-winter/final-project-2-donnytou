@@ -18,6 +18,12 @@ execute:
 from: markdown+emoji
 ---
 
+::: {.callout-tip icon=false}
+## Github Repo Link
+
+[Donny's Final Project Repo](https://github.com/stat301-2-2024-winter/final-project-2-donnytou.git)
+:::
+
 ## Introduction
 The ubiquity of driving in the daily lives of Americans brings both convenience and significant risks. While driving offers cost-effective and time-efficient transportation, it is also associated with an alarming frequency of traffic collisions, resulting in severe injuries and fatalities. This report aims to predict the injury status of traffic collisions occurring in the City of Chicago, IL, focusing on the the following classification-based predictive question: **In a given traffic collision, will any of the unfortunate individuals involved emerge injured?**
 
