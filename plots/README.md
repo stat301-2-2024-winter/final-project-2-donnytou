@@ -18,7 +18,7 @@ Below is a brief overview describing the contents of this repository...
 • `plots/`: A subdirectory containing the finalized visualizations used in the presentation of this project\
 • `memos/`: A subdirectory containing file sets (.qmd and .html) for Progress Memos 1 and 2
 
-### Reports
+Reports
 
 • `Tou_Donny_executive_summary`: A set of files (.qmd and .html) used to produce and present the executive summary for this project\
 • `Tou_Donny_final_report`: A set of files (.qmd and .html) that both correspond to the production of the final report for this project
